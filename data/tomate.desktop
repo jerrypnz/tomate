@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Tomate
+Comment=Tomate is a tool for pomodoro technique
+Exec=tomate
+Icon=stock_task
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+StartupNotify=true
+Categories=GNOME;GTK;Office;
