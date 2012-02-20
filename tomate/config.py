@@ -5,7 +5,7 @@ class Config(object):
     """Configuration object"""
     def __init__(self):
         super(Config, self).__init__()
-        self.conf_dir = os.path.expanduser('~/.pytomato/')
+        self.conf_dir = os.path.expanduser('~/.tomate/')
         self.db_file = 'data.db'
         self._create_conf_dir()
 
