@@ -51,7 +51,7 @@ class ActivityView(gtk.VBox):
 
         self.connect('destroy', lambda arg : self.act_model.close())
 
-        act_wnd = gtk.ScrolledWindow(hadjustment=None)
+        act_wnd = gtk.ScrolledWindow()
         act_wnd.add(self.act_view)
         act_wnd.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.pack_start(new_act_hbox, False, False)
