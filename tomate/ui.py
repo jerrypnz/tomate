@@ -35,8 +35,8 @@ class MainWindow(gtk.Window):
         self.set_title('Tomate')
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_border_width(10)
-        self.set_geometry_hints(self.menu_view, min_width=120, min_height=350)
-        self.set_geometry_hints(self.notebook, min_width=500, min_height=350)
+        self.set_geometry_hints(self.menu_view, min_width=120, min_height=450)
+        self.set_geometry_hints(self.notebook, min_width=600, min_height=450)
 
         self.connect('destroy', self._on_close)
 
