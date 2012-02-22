@@ -1,6 +1,8 @@
 from tomate.config import conf
 
 import time
+import datetime
+import calendar
 import sqlite3 as sqlite
 import os.path
 
@@ -10,6 +12,10 @@ class TomatoError(Exception):
 
 TODO = 0
 PLANNED = 1
+
+RUNNING = 0
+FINISHED = 1
+INTERRUPTED = 2
 
 class Activity(object):
     """Activity class"""
@@ -49,17 +55,19 @@ class Activity(object):
 
 class Tomato(object):
     """Tomato Class"""
-    RUNNING = 0
-    FINISHED = 1
-    INTERRUPTED = 2
 
-    def __init__(self, activity, duration=25):
+    def __init__(self, activity=None, duration=25):
         super(Tomato, self).__init__()
         self.id = None # For RDBMS based stores
-        self.name = activity.name
+        name = desc = None
+        if activity:
+            name = activity.name
+            desc = activity.description
         self.activity = activity
+        self.name = name
+        self.description = desc
         self.duration = duration
-        self.state = Tomato.RUNNING
+        self.state = RUNNING
         self.start_time = time.time()
         self.end_time = self.start_time + duration * 60
 
@@ -67,7 +75,7 @@ class Tomato(object):
         current_time = time.time()
         if current_time >= self.end_time:
             raise TomatoError("The tomato is ended")
-        self.state = Tomato.INTERRUPTED
+        self.state = INTERRUPTED
         self.end_time = time.time()
         self.activity.add_interrupt()
 
@@ -75,7 +83,7 @@ class Tomato(object):
         current_time = time.time()
         if current_time < self.end_time:
             raise TomatoError("Not finished yet")
-        self.state = Tomato.FINISHED
+        self.state = FINISHED
         self.activity.add_tomato()
 
     def __repr__(self):
@@ -87,6 +95,14 @@ class Tomato(object):
 def open_store():
     filename = conf.get_db_filename()
     return SqliteStore(filename)
+
+
+def datetime2secs(dt):
+    '''Convert a datetime object to seconds since epoch in UTC'''
+    if isinstance(dt, datetime.datetime):
+        return time.mktime(dt.utctimetuple())
+    else:
+        return dt
 
 
 class SqliteStore(object):
@@ -105,6 +121,7 @@ class SqliteStore(object):
             id integer primary key,
             name text,
             description text,
+            priority integer,
             tomatoes integer,
             interrupts integer,
             finish_time integer
@@ -112,6 +129,7 @@ class SqliteStore(object):
         '''create table tomato (
             id integer primary key,
             name text,
+            description text,
             activity_id integer,
             start_time integer,
             end_time integer,
@@ -126,6 +144,13 @@ class SqliteStore(object):
         ,tomatoes
         ,interrupts
         ,finish_time'''
+
+    TOMATO_ROWS = '''id
+        ,name
+        ,description
+        ,start_time
+        ,end_time
+        ,state'''
 
     def __init__(self, filename):
         super(SqliteStore, self).__init__()
@@ -150,6 +175,18 @@ class SqliteStore(object):
          act.finish_time,
         ) = result_tuple
         return act
+
+    @classmethod
+    def _map_to_tomato(cls, result_tuple):
+        t = Tomato(activity=None)
+        (t.id,
+         t.name,
+         t.description,
+         t.start_time,
+         t.end_time,
+         t.state,
+        ) = result_tuple
+        return t
 
     def save_activity(self, activity):
         cur = self.conn.cursor()
@@ -216,6 +253,14 @@ class SqliteStore(object):
                 where priority=?''' % self.ACT_ROWS, (priority,))
         return [ self._map_to_activity(r) for r in cur.fetchall() ]
 
+    def list_activity_histories(self, time1, time2):
+        time1 = datetime2secs(time1)
+        time2 = datetime2secs(time2)
+        cur = self.conn.cursor()
+        cur.execute('''select %s from activity_history
+                where finish_time>=? and finish_time<?''' % self.ACT_ROWS, (time1, time2))
+        return [ self._map_to_activity(r) for r in cur.fetchall() ]
+
     def archive_activities(self):
         cur = self.conn.cursor()
         cur.execute('''select %s from activity
@@ -225,12 +270,14 @@ class SqliteStore(object):
             cur.execute('''insert into activity_history(
                     name,
                     description,
+                    priority,
                     tomatoes,
                     interrupts,
                     finish_time) values (
-                    ?, ?, ?, ?, ?)''', (
+                    ?, ?, ?, ?, ?, ?)''', (
                     act.name,
                     act.description,
+                    act.priority,
                     act.tomatoes,
                     act.interrupts,
                     act.finish_time,
@@ -256,12 +303,14 @@ class SqliteStore(object):
             act_id = tomato.activity.id
         cur.execute('''insert into tomato(
                 name,
+                description,
                 activity_id,
                 start_time,
                 end_time,
                 state) values (
-                ?, ?, ?, ?, ?)''', (
+                ?, ?, ?, ?, ?, ?)''', (
                 tomato.name,
+                tomato.description,
                 act_id,
                 tomato.start_time,
                 tomato.end_time,
@@ -295,6 +344,15 @@ class SqliteStore(object):
             )
         self.conn.commit()
         return cur.rowcount
+
+    def list_tomatoes(self, time1, time2):
+        time1 = datetime2secs(time1)
+        time2 = datetime2secs(time2)
+        cur = self.conn.cursor()
+        cur.execute('''select %s from tomato
+                where start_time>=? and start_time<? and state!=?''' % self.TOMATO_ROWS,
+                (time1, time2, RUNNING))
+        return [ self._map_to_tomato(r) for r in cur.fetchall() ]
 
     def close(self):
         self.conn.close()
