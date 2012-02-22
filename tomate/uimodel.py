@@ -2,6 +2,9 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
+from datetime import datetime
+from datetime import time
+from datetime import timedelta
 
 from tomate import model
 
@@ -72,4 +75,26 @@ class ActivityStore(gtk.ListStore):
     def close(self):
         self.store.archive_activities()
         self.store.close()
+
+
+class FinishedTomatoModel(gtk.ListStore):
+    (TIME_COL,
+     ACTIVITY_COL,
+     INTERRUPTED_COL) = range(3)
+
+    def __init__(self):
+        super(FinishedTomatoModel, self).__init__(str, str, bool)
+        self.store = model.open_store()
+
+    def load_finished_tomatoes(self, date):
+        t = time(0, 0, 0)
+        start_time = datetime.combine(date, t)
+        end_time = start_time + timedelta(days=1)
+        tomatoes = self.store.list_tomatoes(start_time, end_time)
+        self.clear()
+        for tomato in tomatoes:
+            start = datetime.fromtimestamp(tomato.start_time).strftime('%H:%M')
+            end = datetime.fromtimestamp(tomato.end_time).strftime('%H:%M')
+            self.append(('%s - %s' % (start, end), tomato.name, tomato.state == model.INTERRUPTED))
+
 
