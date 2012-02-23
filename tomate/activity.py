@@ -73,7 +73,7 @@ class ActivityView(gtk.VBox):
 
         def _interrupt_render_func(col, renderer, model, iter, user_data=None):
             interrupts = model.get_value(iter, ActivityStore.INTERRUPT_COL)
-            renderer.set_property('markup', '<span foreground="#DC143C">%s</span>' % interrupts)
+            renderer.set_property('markup', '<span foreground="#CD3232">%s</span>' % interrupts)
 
         act_model = ActivityStore()
         act_view = gtk.TreeView()

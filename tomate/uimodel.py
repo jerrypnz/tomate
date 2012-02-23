@@ -98,10 +98,15 @@ class FinishedTomatoModel(gtk.ListStore):
         start_time, end_time = day_range(date)
         tomatoes = self.store.list_tomatoes(start_time, end_time)
         self.clear()
+        interrupt_count = 0
         for tomato in tomatoes:
             start = datetime.fromtimestamp(tomato.start_time).strftime('%H:%M')
             end = datetime.fromtimestamp(tomato.end_time).strftime('%H:%M')
-            self.append(('%s - %s' % (start, end), tomato.name, tomato.state == model.INTERRUPTED))
+            interrupt = (tomato.state == model.INTERRUPTED)
+            if interrupt:
+                interrupt_count = interrupt_count + 1
+            self.append(('%s - %s' % (start, end), tomato.name, interrupt))
+        return (len(tomatoes) - interrupt_count, interrupt_count)
 
 
 class FinishedActivityModel(gtk.ListStore):
@@ -117,4 +122,5 @@ class FinishedActivityModel(gtk.ListStore):
         self.clear()
         for act in itertools.chain(act_histories, acts):
             self.append((True, act.name))
+        return len(act_histories) + len(acts)
 

@@ -15,6 +15,8 @@ class HistoryView(gtk.HPaned):
         self.tomato_model = self.tomato_view.get_model()
         self.act_view = self._create_activity_view()
         self.act_model = self.act_view.get_model()
+        self.statistics = gtk.Label()
+        self.statistics.set_justify(gtk.JUSTIFY_RIGHT)
 
         act_wnd = gtk.ScrolledWindow()
         act_wnd.add(self.act_view)
@@ -28,10 +30,14 @@ class HistoryView(gtk.HPaned):
         pane.pack1(act_wnd, shrink=False)
         pane.pack2(tomato_wnd, shrink=False)
 
-        box = gtk.VBox(False, 2)
-        box.pack_start(self.calendar, False, False, padding=1)
+        box1 = gtk.VBox(False, 2)
+        box1.pack_start(self.calendar, False, False, padding=5)
+        box1.pack_start(self.statistics, False, False, padding=20)
 
-        self.pack1(box, shrink=False)
+        box2 = gtk.HBox(False, 1)
+        box2.pack_start(box1, True, True, padding=5)
+
+        self.pack1(box2, shrink=False)
         self.pack2(pane, shrink=False)
 
         self._on_day_changed(self.calendar)
@@ -75,6 +81,10 @@ class HistoryView(gtk.HPaned):
         y, m, d = calendar.get_date()
         #The month is 0-based, so we need to add 1 to it
         selected_day = date(y, m + 1, d)
-        self.tomato_model.load_finished_tomatoes(selected_day)
-        self.act_model.load_finished_activities(selected_day)
+        tomato_count, interruption_count = self.tomato_model.load_finished_tomatoes(selected_day)
+        finished_act_count = self.act_model.load_finished_activities(selected_day)
+        markup = '''<span foreground="#32CD32">Tomatoes: %-s</span>
+<span foreground="#CD3232">Interruptions: %-s</span>
+Finished Activities: %-s''' % (tomato_count, interruption_count, finished_act_count)
+        self.statistics.set_markup(markup)
 
