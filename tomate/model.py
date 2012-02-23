@@ -253,6 +253,14 @@ class SqliteStore(object):
                 where priority=?''' % self.ACT_ROWS, (priority,))
         return [ self._map_to_activity(r) for r in cur.fetchall() ]
 
+    def list_finished_activities(self, time1, time2):
+        time1 = datetime2secs(time1)
+        time2 = datetime2secs(time2)
+        cur = self.conn.cursor()
+        cur.execute('''select %s from activity
+                where finish_time>=? and finish_time<?''' % self.ACT_ROWS, (time1, time2))
+        return [ self._map_to_activity(r) for r in cur.fetchall() ]
+
     def list_activity_histories(self, time1, time2):
         time1 = datetime2secs(time1)
         time2 = datetime2secs(time2)

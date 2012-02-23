@@ -3,7 +3,7 @@ pygtk.require('2.0')
 import gtk
 
 from datetime import date
-from tomate.uimodel import FinishedTomatoModel
+from tomate.uimodel import FinishedTomatoModel, FinishedActivityModel
 
 class HistoryView(gtk.HPaned):
     """Activity history view"""
@@ -24,12 +24,15 @@ class HistoryView(gtk.HPaned):
         tomato_wnd.add(self.tomato_view)
         tomato_wnd.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        top_box = gtk.VBox(False, 2)
-        top_box.pack_start(self.calendar, False, False)
-        top_box.pack_end(act_wnd, True, True)
+        pane = gtk.VPaned()
+        pane.pack1(act_wnd, shrink=False)
+        pane.pack2(tomato_wnd, shrink=False)
 
-        self.pack1(top_box, shrink=False)
-        self.pack2(tomato_wnd, shrink=False)
+        box = gtk.VBox(False, 2)
+        box.pack_start(self.calendar, False, False, padding=1)
+
+        self.pack1(box, shrink=False)
+        self.pack2(pane, shrink=False)
 
         self._on_day_changed(self.calendar)
         self.calendar.connect('day-selected', self._on_day_changed)
@@ -60,14 +63,12 @@ class HistoryView(gtk.HPaned):
 
     def _create_activity_view(self):
         view = gtk.TreeView()
-        model = gtk.ListStore(bool, str)
+        model = FinishedActivityModel()
         view.set_model(model)
         finish_col = gtk.TreeViewColumn('#', gtk.CellRendererToggle(), active=0)
         activity_col = gtk.TreeViewColumn('Finished Activity', gtk.CellRendererText(), text=1)
         view.append_column(finish_col)
         view.append_column(activity_col)
-        model.append((True, 'Play football'))
-        model.append((True, 'Write program'))
         return view
 
     def _on_day_changed(self, calendar):
@@ -75,4 +76,5 @@ class HistoryView(gtk.HPaned):
         #The month is 0-based, so we need to add 1 to it
         selected_day = date(y, m + 1, d)
         self.tomato_model.load_finished_tomatoes(selected_day)
+        self.act_model.load_finished_activities(selected_day)
 

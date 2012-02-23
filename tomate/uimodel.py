@@ -2,6 +2,8 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
+import itertools
+
 from datetime import datetime
 from datetime import time
 from datetime import timedelta
@@ -77,6 +79,12 @@ class ActivityStore(gtk.ListStore):
         self.store.close()
 
 
+def day_range(date):
+    t = time(0, 0, 0)
+    start_time = datetime.combine(date, t)
+    end_time = start_time + timedelta(days=1)
+    return (start_time, end_time)
+
 class FinishedTomatoModel(gtk.ListStore):
     (TIME_COL,
      ACTIVITY_COL,
@@ -87,9 +95,7 @@ class FinishedTomatoModel(gtk.ListStore):
         self.store = model.open_store()
 
     def load_finished_tomatoes(self, date):
-        t = time(0, 0, 0)
-        start_time = datetime.combine(date, t)
-        end_time = start_time + timedelta(days=1)
+        start_time, end_time = day_range(date)
         tomatoes = self.store.list_tomatoes(start_time, end_time)
         self.clear()
         for tomato in tomatoes:
@@ -97,4 +103,18 @@ class FinishedTomatoModel(gtk.ListStore):
             end = datetime.fromtimestamp(tomato.end_time).strftime('%H:%M')
             self.append(('%s - %s' % (start, end), tomato.name, tomato.state == model.INTERRUPTED))
 
+
+class FinishedActivityModel(gtk.ListStore):
+    """List model for Activity history"""
+    def __init__(self):
+        super(FinishedActivityModel, self).__init__(bool, str)
+        self.store = model.open_store()
+
+    def load_finished_activities(self, date):
+        start_time, end_time = day_range(date)
+        act_histories = self.store.list_activity_histories(start_time, end_time)
+        acts = self.store.list_finished_activities(start_time, end_time)
+        self.clear()
+        for act in itertools.chain(act_histories, acts):
+            self.append((True, act.name))
 
