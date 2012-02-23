@@ -14,7 +14,7 @@ MENU_ICON_SIZE = 32
 
 PAGES = [
         ('Activity',    'ActivityView', 'stock_task'),
-        ('Plan',        'PlanView',     'tomboy'),
+        ('Plan',        'PlanView',     'stock_notes'),
         ('History',     'HistoryView',  'stock_calendar'),
     ]
 
