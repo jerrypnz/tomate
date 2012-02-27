@@ -1,0 +1,12 @@
+Metadata-Version: 1.1
+Name: tomate
+Version: 0.1
+Summary: Tomate is a tool for pomodoro technique, powered by PyGTK
+Home-page: https://github.com/moonranger/tomate
+Author: Jerry Peng
+Author-email: pr2jerry@gmail.com
+License: GNU GPL v3
+Description: UNKNOWN
+Platform: linux
+Requires: pygtk(>=2.4)
+Requires: pynotify
