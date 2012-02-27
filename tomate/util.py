@@ -19,6 +19,7 @@ def new_text_col(colname, data_func):
     col.set_cell_data_func(renderer, data_func)
     return col
 
+
 def new_small_button(iconname, click_callback, tooltip=None, relief=gtk.RELIEF_NONE):
     btn = gtk.Button()
     btn.set_image(gtk.image_new_from_icon_name(iconname, gtk.ICON_SIZE_BUTTON))
