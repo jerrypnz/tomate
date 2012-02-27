@@ -79,6 +79,8 @@ class PlanView(gtk.VBox):
         title_col = util.new_text_col('Activity', _act_name_render_func)
         title_col.set_resizable(True)
         title_col.set_expand(True)
+        title_col.get_cell_renderers()[0].set_property('editable', True)
+        title_col.get_cell_renderers()[0].connect('edited', self._on_act_name_changed)
 
         act_view.append_column(toggle_col)
         act_view.append_column(title_col)
@@ -121,6 +123,14 @@ class PlanView(gtk.VBox):
         activity = self.act_model.get_activity_byiter(it)
         if not activity.is_finished():
             activity.finish()
+        self.act_model.update_activity(activity)
+
+    def _on_act_name_changed(self, cell, path, new_text, user_data=None):
+        activity = self.act_model.get_activity_bypath(path)
+        if not new_text.strip():
+            return
+        new_name = new_text.decode('UTF-8')
+        activity.name = new_name
         self.act_model.update_activity(activity)
 
     def _on_del_activity(self, widget):

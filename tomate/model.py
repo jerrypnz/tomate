@@ -231,8 +231,19 @@ class SqliteStore(object):
                 activity.id,
                 )
             )
+        rowcount = cur.rowcount
+        if rowcount > 0:
+            cur.execute('''update tomato set
+                    name=?,
+                    description=?
+                    where activity_id=?''', (
+                    activity.name,
+                    activity.description,
+                    activity.id,
+                    )
+                )
         self.conn.commit()
-        return cur.rowcount
+        return rowcount
 
     def delete_activity(self, activity):
         if activity.id is None:

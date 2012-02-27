@@ -21,6 +21,7 @@ class HistoryView(gtk.HPaned):
         act_wnd = gtk.ScrolledWindow()
         act_wnd.add(self.act_view)
         act_wnd.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        act_wnd.set_size_request(-1, 120)
 
         tomato_wnd = gtk.ScrolledWindow()
         tomato_wnd.add(self.tomato_view)
