@@ -4,8 +4,7 @@ import gtk
 import gobject
 import logging
 
-from tomate.plan import PlanView
-from tomate.activity import ActivityView
+from tomate.activity import TodoView, PlanView
 from tomate.history import HistoryView
 
 icontheme = gtk.icon_theme_get_default()
@@ -13,8 +12,8 @@ icontheme = gtk.icon_theme_get_default()
 MENU_ICON_SIZE = 32
 
 PAGES = [
-        ('Activity',    'ActivityView', 'stock_task'),
-        ('Plan',        'PlanView',     'tomboy'),
+        ('ToDo',        'TodoView',     'stock_task'),
+        ('Plan',        'PlanView',     'stock_notes'),
         ('History',     'HistoryView',  'stock_calendar'),
     ]
 
@@ -35,8 +34,8 @@ class MainWindow(gtk.Window):
         self.set_title('Tomate')
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_border_width(10)
-        self.set_geometry_hints(self.menu_view, min_width=120, min_height=350)
-        self.set_geometry_hints(self.notebook, min_width=500, min_height=350)
+        self.set_geometry_hints(self.menu_view, min_width=140, min_height=550)
+        self.set_geometry_hints(self.notebook, min_width=700, min_height=550)
 
         self.connect('destroy', self._on_close)
 
@@ -87,7 +86,12 @@ class MainWindow(gtk.Window):
 
     def _on_select_change(self, widget):
         (model, it) = self.menu_view.get_selection().get_selected()
-        self.notebook.set_current_page(model.get_value(it, 2))
+        if model and it:
+            pgnum = model.get_value(it, 2)
+            self.notebook.set_current_page(pgnum)
+            view = self.notebook.get_nth_page(pgnum)
+            if hasattr(view, 'refresh'):
+                view.refresh()
 
 
 main_window = MainWindow()

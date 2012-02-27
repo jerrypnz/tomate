@@ -1,5 +1,6 @@
 from tomate import model
 import time
+from datetime import datetime
 
 
 def test_save_activity(st):
@@ -63,8 +64,22 @@ def test_archive_activities(st):
     st.save_activity(act)
     st.archive_activities()
 
+def test_list_tomatoes(st, time1, time2):
+    print "--------------test list tomatoes----------------"
+    t_list = st.list_tomatoes(time1, time2)
+    for t in t_list:
+        print t
+
+def test_list_acthistories(st, time1, time2):
+    print "--------------test list activity histories----------------"
+    acts = st.list_activity_histories(time1, time2)
+    for a in acts:
+        print a
+
 def main():
     st = model.SqliteStore('/tmp/test.db')
+    time1 = datetime.now()
+    print "Start time: ", model.datetime2secs(time1)
     test_save_activity(st)
     act = test_save_activity(st)
     print act
@@ -80,6 +95,11 @@ def main():
     print test_update_tomato(st, act)
     test_delete_activity(st, act)
     test_archive_activities(st)
+    time.sleep(1)
+    time2 = datetime.now()
+    print "End time: ", model.datetime2secs(time2)
+    test_list_tomatoes(st, time1, time2)
+    test_list_acthistories(st, time1, time2)
     st.close()
 
 if __name__ == '__main__':
