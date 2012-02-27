@@ -104,6 +104,9 @@ class ActivityView(gtk.VBox):
 
         return act_view
 
+    def refresh(self):
+        self.act_model.load_activities()
+
     def _on_add(self, widget, *args, **kwargs):
         name = self.act_name.get_text().decode('UTF-8')
         self.act_name.set_text('')

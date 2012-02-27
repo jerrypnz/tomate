@@ -43,6 +43,8 @@ class ActivityStore(gtk.ListStore):
             self._append_activity(act)
 
     def add_activity(self, act):
+        #Make sure the activity has the same priority with current model's
+        act.priority = self.priority
         self.store.save_activity(act)
         self._append_activity(act)
 
@@ -64,7 +66,10 @@ class ActivityStore(gtk.ListStore):
     def update_activity(self, act):
         self.store.update_activity(act)
         it = self.get_iter(act._path)
-        self._update_activity(act, it)
+        if act.priority == self.priority:
+            self._update_activity(act, it)
+        else:
+            self.remove(it)
 
     def finish_tomato(self, tomato, interrupt):
         if interrupt:

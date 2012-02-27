@@ -77,6 +77,9 @@ class HistoryView(gtk.HPaned):
         view.append_column(activity_col)
         return view
 
+    def refresh(self):
+        self._on_day_changed(self.calendar)
+
     def _on_day_changed(self, calendar):
         y, m, d = calendar.get_date()
         #The month is 0-based, so we need to add 1 to it

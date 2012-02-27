@@ -87,7 +87,12 @@ class MainWindow(gtk.Window):
 
     def _on_select_change(self, widget):
         (model, it) = self.menu_view.get_selection().get_selected()
-        self.notebook.set_current_page(model.get_value(it, 2))
+        if model and it:
+            pgnum = model.get_value(it, 2)
+            self.notebook.set_current_page(pgnum)
+            view = self.notebook.get_nth_page(pgnum)
+            if hasattr(view, 'refresh'):
+                view.refresh()
 
 
 main_window = MainWindow()
