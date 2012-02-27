@@ -4,8 +4,7 @@ import gtk
 import gobject
 import logging
 
-from tomate.plan import PlanView
-from tomate.activity import ActivityView
+from tomate.activity import TodoView, PlanView
 from tomate.history import HistoryView
 
 icontheme = gtk.icon_theme_get_default()
@@ -13,7 +12,7 @@ icontheme = gtk.icon_theme_get_default()
 MENU_ICON_SIZE = 32
 
 PAGES = [
-        ('Activity',    'ActivityView', 'stock_task'),
+        ('ToDo',        'TodoView',     'stock_task'),
         ('Plan',        'PlanView',     'stock_notes'),
         ('History',     'HistoryView',  'stock_calendar'),
     ]

@@ -19,6 +19,15 @@ def new_text_col(colname, data_func):
     col.set_cell_data_func(renderer, data_func)
     return col
 
+def new_small_button(iconname, click_callback, tooltip=None, relief=gtk.RELIEF_NONE):
+    btn = gtk.Button()
+    btn.set_image(gtk.image_new_from_icon_name(iconname, gtk.ICON_SIZE_BUTTON))
+    if tooltip:
+        btn.set_tooltip_text(tooltip)
+    btn.set_relief(relief)
+    btn.connect('clicked', click_callback)
+    return btn
+
 
 def show_message_dialog(msg, type=gtk.MESSAGE_INFO):
     main_window = globals().get('main_window', None)
