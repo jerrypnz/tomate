@@ -34,6 +34,13 @@ class ActivityView(gtk.VBox):
         self.finish_button.set_relief(gtk.RELIEF_NONE)
         self.finish_button.connect('clicked', self._on_mark_finish)
 
+        self.later_button = gtk.Button()
+        self.later_button.set_tooltip_text('Move the selected activity to the inbox for later processing')
+        self.later_button.set_image(gtk.image_new_from_icon_name(
+                    'stock_down', gtk.ICON_SIZE_BUTTON))
+        self.later_button.set_relief(gtk.RELIEF_NONE)
+        self.later_button.connect('clicked', self._on_later)
+
         self.delete_button = gtk.Button()
         self.delete_button.set_tooltip_text('Remove the selected activity')
         self.delete_button.set_image(gtk.image_new_from_icon_name(
@@ -44,6 +51,7 @@ class ActivityView(gtk.VBox):
         new_act_hbox = gtk.HBox(False, 4)
         new_act_hbox.pack_start(self.start_button, False, False)
         new_act_hbox.pack_start(self.finish_button, False, False)
+        new_act_hbox.pack_start(self.later_button, False, False)
         new_act_hbox.pack_start(self.delete_button, False, False)
 
         self.act_view = self._create_list_view()
@@ -125,28 +133,34 @@ class ActivityView(gtk.VBox):
         self.act_model.update_activity(activity)
 
     def _on_mark_finish(self, widget):
-        (model, it) = self.act_view.get_selection().get_selected()
-        activity = model.get_activity_byiter(it)
+        (_, it) = self.act_view.get_selection().get_selected()
+        activity = self.act_model.get_activity_byiter(it)
         if not activity.is_finished():
             activity.finish()
         self.act_model.update_activity(activity)
 
+    def _on_later(self, widget):
+        (_, it) = self.act_view.get_selection().get_selected()
+        activity = self.act_model.get_activity_byiter(it)
+        activity.priority = model.PLANNED
+        self.act_model.update_activity(activity)
+
     def _on_start_timer(self, widget):
-        (model, it) = self.act_view.get_selection().get_selected()
+        (_, it) = self.act_view.get_selection().get_selected()
         if not it:
             util.show_message_dialog("Please select an activity")
             return
-        activity = model.get_activity_byiter(it)
+        activity = self.act_model.get_activity_byiter(it)
         self.parent_window.hide()
         timer_diag = TimerDialog(activity, finish_callback=self._on_timer_ends)
         timer_diag.show_all()
 
     def _on_del_activity(self, widget):
-        (model, it) = self.act_view.get_selection().get_selected()
+        (_, it) = self.act_view.get_selection().get_selected()
         if not it:
             util.show_message_dialog("Please select an activity")
             return
-        model.delete_activity_byiter(it)
+        self.act_model.delete_activity_byiter(it)
 
     def _on_timer_ends(self, tomato, interrupt):
         title = 'Tomato Finished'

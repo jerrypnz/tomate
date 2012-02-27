@@ -23,7 +23,7 @@ class PlanView(gtk.VBox):
         self.move_button = gtk.Button()
         self.move_button.set_tooltip_text('Move the selected activity to activity view')
         self.move_button.set_image(gtk.image_new_from_icon_name(
-                    'media-playback-start', gtk.ICON_SIZE_BUTTON))
+                    'stock_up', gtk.ICON_SIZE_BUTTON))
         self.move_button.set_relief(gtk.RELIEF_NONE)
         self.move_button.connect('clicked', self._on_move)
 
