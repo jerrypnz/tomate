@@ -31,11 +31,11 @@ class HistoryView(gtk.HPaned):
         pane.pack1(act_wnd, shrink=False)
         pane.pack2(tomato_wnd, shrink=False)
 
-        box1 = gtk.VBox(False, 2)
+        box1 = gtk.VBox(False, 0)
         box1.pack_start(self.calendar, False, False, padding=5)
         box1.pack_start(self.statistics, False, False, padding=20)
 
-        box2 = gtk.HBox(False, 1)
+        box2 = gtk.HBox(False, 0)
         box2.pack_start(box1, True, True, padding=5)
 
         self.pack1(box2, shrink=False)

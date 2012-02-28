@@ -10,7 +10,7 @@ from tomate.uimodel import ActivityStore
 class BaseActivityView(gtk.VBox):
     """Base class for activity views"""
     def __init__(self, parent_window, priority=model.TODO):
-        super(BaseActivityView, self).__init__(False, 3)
+        super(BaseActivityView, self).__init__(False, 0)
         self.parent_window = parent_window
         self.priority = priority
         self.act_name = gtk.Entry()
@@ -34,7 +34,7 @@ class BaseActivityView(gtk.VBox):
         buttons = [finish_btn, del_btn]
         for btn, pos in self._create_additional_buttons():
             buttons.insert(pos, btn)
-        new_act_hbox = gtk.HBox(False, len(buttons))
+        new_act_hbox = gtk.HBox(False, 0)
         for btn in buttons:
             new_act_hbox.pack_start(btn, False, False)
 
@@ -103,7 +103,6 @@ class BaseActivityView(gtk.VBox):
     def _on_focus(self, widget, *args, **kwargs):
         name = self.act_name.get_text()
         self.act_name.select_region(0, len(name))
-        return True
 
     def _on_toggle_finish(self, renderer, path, user_data=None):
         activity = self.act_model.get_activity_bypath(path)
@@ -264,7 +263,7 @@ class TimerDialog(gtk.Window):
         self.interrupt_button.set_tooltip_text('Interrupt')
         self.interrupt_button.connect('clicked', self._on_interrupt)
         self.connect('delete-event', self._on_interrupt)
-        box = gtk.VBox(False, 2)
+        box = gtk.VBox(False, 0)
         box.pack_start(self.time_label, False, False)
         box.pack_end(self.interrupt_button, False, False)
         self.add(box)

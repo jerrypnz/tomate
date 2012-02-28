@@ -25,6 +25,7 @@ def new_small_button(iconname, click_callback, tooltip=None, relief=gtk.RELIEF_N
     btn.set_image(gtk.image_new_from_icon_name(iconname, gtk.ICON_SIZE_BUTTON))
     if tooltip:
         btn.set_tooltip_text(tooltip)
+    btn.set_focus_on_click(False)
     btn.set_relief(relief)
     btn.connect('clicked', click_callback)
     return btn
