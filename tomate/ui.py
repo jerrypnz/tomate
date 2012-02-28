@@ -3,6 +3,10 @@ pygtk.require('2.0')
 import gtk
 import gobject
 import logging
+import webbrowser
+
+from tomate import timequotes
+from tomate import util
 
 from tomate.activity import TodoView, PlanView
 from tomate.history import HistoryView
@@ -17,23 +21,50 @@ PAGES = [
         ('History',     'HistoryView',  'stock_calendar'),
     ]
 
+
 class MainWindow(gtk.Window):
     """Activity Window Class"""
     def __init__(self):
         super(MainWindow, self).__init__()
         self.notebook = self._create_notebook()
         self.menu_view = self._create_menuview()
+        self.menu_view.set_size_request(120, -1)
         self.menu_model = self.menu_view.get_model()
         self._setup_pages()
 
         mainpane = gtk.HPaned()
         mainpane.pack1(self.menu_view, shrink=False)
         mainpane.pack2(self.notebook, shrink=False)
-        self.add(mainpane)
+
+        quote, author = timequotes.random_quote()
+        quotelabel = gtk.Label(shorten_quote(quote))
+        spacing = ' ' * 50
+        quotelabel.set_tooltip_markup('%s\n%s<i><s>    </s> %s</i>' % (quote, spacing, author))
+
+        option_btn = util.new_small_button(
+                'gtk-preferences',
+                self._on_options,
+                tooltip='Tomate preferences')
+
+        homepage_btn = util.new_small_button(
+                'dialog-info',
+                self._on_howpage,
+                tooltip='Visit Tomate home page')
+
+        bottombox = gtk.HBox(False, 0)
+        bottombox.pack_start(quotelabel, False, False)
+        bottombox.pack_end(option_btn, False, False)
+        bottombox.pack_end(homepage_btn, False, False)
+
+        mainbox = gtk.VBox(False, 5)
+        mainbox.pack_start(mainpane, True, True)
+        mainbox.pack_end(bottombox, False, False)
+        self.add(mainbox)
 
         self.set_title('Tomate')
         self.set_position(gtk.WIN_POS_CENTER)
-        self.set_border_width(10)
+        self.set_icon_name('stock_task')
+        self.set_border_width(5)
         self.set_geometry_hints(self.menu_view, min_width=140, min_height=550)
         self.set_geometry_hints(self.notebook, min_width=700, min_height=550)
 
@@ -84,6 +115,13 @@ class MainWindow(gtk.Window):
     def _on_close(self, widget, data=None):
         gtk.main_quit()
 
+    def _on_options(self, widget):
+        pass
+
+    def _on_howpage(self, widget):
+        webbrowser.open('https://github.com/moonranger/tomate')
+        return False
+
     def _on_select_change(self, widget):
         (model, it) = self.menu_view.get_selection().get_selected()
         if model and it:
@@ -92,6 +130,18 @@ class MainWindow(gtk.Window):
             view = self.notebook.get_nth_page(pgnum)
             if hasattr(view, 'refresh'):
                 view.refresh()
+
+
+QUOTE_MAX_CHARS = 80
+
+def shorten_quote(quote):
+    if len(quote) <= QUOTE_MAX_CHARS:
+        return quote
+    substr = quote[:QUOTE_MAX_CHARS]
+    p = substr.rfind(' ')
+    if p:
+        substr = substr[:p]
+    return substr + '...'
 
 
 main_window = MainWindow()
