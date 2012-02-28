@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -34,9 +36,10 @@ class BaseActivityView(gtk.VBox):
         buttons = [finish_btn, del_btn]
         for btn, pos in self._create_additional_buttons():
             buttons.insert(pos, btn)
-        new_act_hbox = gtk.HBox(False, 0)
+        toolbar_box = gtk.HBox(False, 0)
         for btn in buttons:
-            new_act_hbox.pack_start(btn, False, False)
+            toolbar_box.pack_start(btn, False, False)
+        toolbar_box.pack_end(self.act_name, True, True)
 
         self.act_model = ActivityStore(priority=self.priority)
         self.act_view = self._create_list_view(self.act_model)
@@ -45,9 +48,10 @@ class BaseActivityView(gtk.VBox):
         act_wnd.add(self.act_view)
         act_wnd.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        self.pack_start(new_act_hbox, False, False)
-        self.pack_start(act_wnd, True, True)
-        self.pack_end(self.act_name, False, False)
+        topbox = gtk.HBox(False, 0)
+        topbox.pack_start(toolbar_box, True, True, padding=5)
+        self.pack_start(topbox, False, False, padding=5)
+        self.pack_end(act_wnd, True, True)
 
     def _create_list_view(self, act_model):
 
