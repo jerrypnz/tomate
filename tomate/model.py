@@ -255,8 +255,9 @@ class SqliteStore(object):
 
     def _delete_activity(self, cur, _id):
         cur.execute('''delete from activity
-                where id=?''', (_id,)
-            )
+                where id=?''', (_id,))
+        cur.execute('''update tomato set activity_id=null
+                where activity_id=?''', (_id,))
 
     def list_activities(self, priority=TODO):
         cur = self.conn.cursor()
