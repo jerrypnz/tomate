@@ -65,8 +65,7 @@ class MainWindow(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_icon_name('stock_task')
         self.set_border_width(5)
-        self.set_geometry_hints(self.menu_view, min_width=140, min_height=550)
-        self.set_geometry_hints(self.notebook, min_width=700, min_height=550)
+        self.set_geometry_hints(mainbox, min_width=750, min_height=515)
 
         self.connect('destroy', self._on_close)
 
