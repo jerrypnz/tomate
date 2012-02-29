@@ -76,13 +76,13 @@ class HistoryView(gtk.HPaned):
         model = FinishedTomatoModel()
         view.set_model(model)
         time_renderer = gtk.CellRendererText()
-        time_col = gtk.TreeViewColumn('Time Range', time_renderer, text=0)
+        time_col = gtk.TreeViewColumn(_('Time Range'), time_renderer, text=0)
         time_col.set_cell_data_func(time_renderer, _set_bg)
         time_col.set_resizable(True)
         time_col.set_expand(True)
 
         activity_renderer = gtk.CellRendererText()
-        activity_col = gtk.TreeViewColumn('Activity', activity_renderer, text=1)
+        activity_col = gtk.TreeViewColumn(_('Activity'), activity_renderer, text=1)
         activity_col.set_cell_data_func(activity_renderer, _set_bg)
         activity_col.set_resizable(True)
         activity_col.set_expand(True)
@@ -95,7 +95,7 @@ class HistoryView(gtk.HPaned):
         model = FinishedActivityModel()
         view.set_model(model)
         finish_col = gtk.TreeViewColumn('#', gtk.CellRendererToggle(), active=0)
-        activity_col = gtk.TreeViewColumn('Finished Activity', gtk.CellRendererText(), text=1)
+        activity_col = gtk.TreeViewColumn(_('Finished Activity'), gtk.CellRendererText(), text=1)
         view.append_column(finish_col)
         view.append_column(activity_col)
         return view
@@ -109,8 +109,13 @@ class HistoryView(gtk.HPaned):
         selected_day = date(y, m + 1, d)
         tomato_count, interruption_count = self.tomato_model.load_finished_tomatoes(selected_day)
         finished_act_count = self.act_model.load_finished_activities(selected_day)
-        markup = '''<span foreground="#32CD32">Tomatoes: %-s</span>
-<span foreground="#CD3232">Interruptions: %-s</span>
-Finished Activities: %-s''' % (tomato_count, interruption_count, finished_act_count)
+        markup = '''
+        <span foreground="#32CD32">%s: %-s</span>
+        <span foreground="#CD3232">%s: %-s</span>
+        %s: %-s''' % (
+            _('Tomatoes'), tomato_count,
+            _('Interruptions'), interruption_count,
+            _('Finished Activities'), finished_act_count,
+            )
         self.statistics.set_markup(markup)
 

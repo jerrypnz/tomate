@@ -38,9 +38,9 @@ icontheme = gtk.icon_theme_get_default()
 MENU_ICON_SIZE = 32
 
 PAGES = [
-        ('ToDo',        'TodoView',     'stock_task'),
-        ('Plan',        'PlanView',     'stock_notes'),
-        ('History',     'HistoryView',  'stock_calendar'),
+        (_('ToDo'),        'TodoView',     'stock_task'),
+        (_('Plan'),        'PlanView',     'stock_notes'),
+        (_('History'),     'HistoryView',  'stock_calendar'),
     ]
 
 
@@ -66,12 +66,12 @@ class MainWindow(gtk.Window):
         option_btn = util.new_small_button(
                 'gtk-preferences',
                 self._on_options,
-                tooltip='Tomate preferences')
+                tooltip=_('Tomate preferences'))
 
         homepage_btn = util.new_small_button(
                 'dialog-info',
                 self._on_howpage,
-                tooltip='Visit Tomate home page')
+                tooltip=_('Visit Tomate home page'))
 
         bottombox = gtk.HBox(False, 0)
         bottombox.pack_start(quotelabel, False, False)

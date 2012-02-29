@@ -27,7 +27,7 @@ import gtk
 import logging
 import pynotify
 
-pynotify.init("PyTomato")
+pynotify.init("Tomate")
 
 def show_notification(title, msg):
     """show a notification message"""

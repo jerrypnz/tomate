@@ -36,9 +36,7 @@ setup(
     entry_points = {
         'gui_scripts': ['tomate=tomate.ui:start_app'],
         },
-    data_files = [
-        ('share/applications', ['data/tomate.desktop']),
-        ],
+    data_files = [],
     license='GNU GPL v3',
     platforms='linux'
 )

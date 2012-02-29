@@ -21,3 +21,10 @@
 
 
 __version__ = '0.1.1'
+
+I18N_PKG_NAME = 'tomate'
+
+import gettext
+
+gettext.install(I18N_PKG_NAME, unicode=True)
+

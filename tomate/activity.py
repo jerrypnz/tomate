@@ -46,12 +46,12 @@ class BaseActivityView(gtk.VBox):
         finish_btn = util.new_small_button(
                 'dialog-ok',
                 self._on_mark_finish,
-                tooltip='Mark the selected activity as finished')
+                tooltip=_('Mark the selected activity as finished'))
 
         del_btn = util.new_small_button(
                 'edit-delete',
                 self._on_delete,
-                tooltip='Remove the selected activity')
+                tooltip=_('Remove the selected activity'))
 
         buttons = [finish_btn, del_btn]
         for btn, pos in self._create_additional_buttons():
@@ -90,7 +90,7 @@ class BaseActivityView(gtk.VBox):
         toggle_renderer.connect('toggled', self._on_toggle_finish)
         toggle_col = gtk.TreeViewColumn('#', toggle_renderer, active=1)
         toggle_col.set_expand(False)
-        title_col = util.new_text_col('Activity', _act_name_render_func)
+        title_col = util.new_text_col(_('Activity'), _act_name_render_func)
         title_col.set_resizable(True)
         title_col.set_expand(True)
         title_col.get_cell_renderers()[0].set_property('editable', True)
@@ -157,7 +157,7 @@ class BaseActivityView(gtk.VBox):
     def _on_delete(self, widget):
         (_, it) = self.act_view.get_selection().get_selected()
         if not it:
-            util.show_message_dialog("Please select an activity")
+            util.show_message_dialog(_("Please select an activity"))
             return
         self.act_model.delete_activity_byiter(it)
         return True
@@ -172,12 +172,12 @@ class TodoView(BaseActivityView):
         start_btn = util.new_small_button(
                 'media-playback-start',
                 self._on_start_timer,
-                tooltip='Start a tomato timer and work on selected activity')
+                tooltip=_('Start a tomato timer and work on selected activity'))
 
         later_btn = util.new_small_button(
                 'stock_down',
                 self._on_later,
-                tooltip='Move the selected activity to the plan list for later processing')
+                tooltip=_('Move the selected activity to the plan list for later processing'))
         return ((start_btn, 0), (later_btn, 1))
 
 
@@ -216,9 +216,9 @@ class TodoView(BaseActivityView):
         return True
 
     def _on_timer_ends(self, tomato, interrupt):
-        title = 'Tomato Finished'
+        title = _('Tomato Finished')
         if interrupt:
-            title = 'Tomato Interrupted'
+            title = _('Tomato Interrupted')
         util.show_notification(title, tomato.name)
         self.act_model.finish_tomato(tomato, interrupt)
         self.parent_window.show_all()
@@ -237,7 +237,7 @@ class PlanView(BaseActivityView):
         move_btn = util.new_small_button(
                 'stock_up',
                 self._on_move,
-                tooltip='Move the selected activity to current ToDo list')
+                tooltip=_('Move the selected activity to current ToDo list'))
         return ((move_btn, 0),)
 
     def _on_move(self, widget, *args, **kwargs):
@@ -280,11 +280,11 @@ class TimerDialog(gtk.Window):
 
         self.time_label = gtk.Label()
         self.time_label.set_tooltip_text(activity.name)
-        self.interrupt_button = gtk.Button('Interrupt')
+        self.interrupt_button = gtk.Button(_('Interrupt'))
         self.interrupt_button.set_image(gtk.image_new_from_icon_name(
                     'media-playback-stop',
                     gtk.ICON_SIZE_BUTTON))
-        self.interrupt_button.set_tooltip_text('Interrupt')
+        self.interrupt_button.set_tooltip_text(_('Interrupt'))
         self.interrupt_button.connect('clicked', self._on_interrupt)
         self.connect('delete-event', self._on_interrupt)
         box = gtk.VBox(False, 0)
