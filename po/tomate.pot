@@ -1,0 +1,102 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-02-29 17:07+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .././data/tomate.desktop.in.h:1
+msgid "Tomate is a tool for pomodoro technique"
+msgstr ""
+
+#: .././tomate/ui.py:41
+msgid "ToDo"
+msgstr ""
+
+#: .././tomate/ui.py:42
+msgid "Plan"
+msgstr ""
+
+#: .././tomate/ui.py:43
+msgid "History"
+msgstr ""
+
+#: .././tomate/ui.py:69
+msgid "Tomate preferences"
+msgstr ""
+
+#: .././tomate/ui.py:74
+msgid "Visit Tomate home page"
+msgstr ""
+
+#: .././tomate/activity.py:49
+msgid "Mark the selected activity as finished"
+msgstr ""
+
+#: .././tomate/activity.py:54
+msgid "Remove the selected activity"
+msgstr ""
+
+#: .././tomate/activity.py:93 .././tomate/history.py:85
+msgid "Activity"
+msgstr ""
+
+#: .././tomate/activity.py:160
+msgid "Please select an activity"
+msgstr ""
+
+#: .././tomate/activity.py:175
+msgid "Start a tomato timer and work on selected activity"
+msgstr ""
+
+#: .././tomate/activity.py:180
+msgid "Move the selected activity to the plan list for later processing"
+msgstr ""
+
+#: .././tomate/activity.py:219
+msgid "Tomato Finished"
+msgstr ""
+
+#: .././tomate/activity.py:221
+msgid "Tomato Interrupted"
+msgstr ""
+
+#: .././tomate/activity.py:240
+msgid "Move the selected activity to current ToDo list"
+msgstr ""
+
+#: .././tomate/activity.py:283 .././tomate/activity.py:287
+msgid "Interrupt"
+msgstr ""
+
+#: .././tomate/history.py:79
+msgid "Time Range"
+msgstr ""
+
+#: .././tomate/history.py:98
+msgid "Finished Activity"
+msgstr ""
+
+#: .././tomate/history.py:116
+msgid "Tomatoes"
+msgstr ""
+
+#: .././tomate/history.py:117
+msgid "Interruptions"
+msgstr ""
+
+#: .././tomate/history.py:118
+msgid "Finished Activities"
+msgstr ""

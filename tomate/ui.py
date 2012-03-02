@@ -1,5 +1,25 @@
 # -*- coding: utf-8 -*-
 
+# Copyright 2012 Jerry Peng
+#
+# Tomate is a time management tool inspired by the
+# pomodoro technique(http://www.pomodorotechnique.com/).
+#
+# Tomate is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation,
+# either version 3 of the License, or (at your option
+# any later version.
+#
+# Tomate is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public
+# License along with Foobar. If not, see http://www.gnu.org/licenses/.
+
+
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -18,9 +38,9 @@ icontheme = gtk.icon_theme_get_default()
 MENU_ICON_SIZE = 32
 
 PAGES = [
-        ('ToDo',        'TodoView',     'stock_task'),
-        ('Plan',        'PlanView',     'stock_notes'),
-        ('History',     'HistoryView',  'stock_calendar'),
+        (_('ToDo'),        'TodoView',     'stock_task'),
+        (_('Plan'),        'PlanView',     'stock_notes'),
+        (_('History'),     'HistoryView',  'stock_calendar'),
     ]
 
 
@@ -46,12 +66,12 @@ class MainWindow(gtk.Window):
         option_btn = util.new_small_button(
                 'gtk-preferences',
                 self._on_options,
-                tooltip='Tomate preferences')
+                tooltip=_('Tomate preferences'))
 
         homepage_btn = util.new_small_button(
                 'dialog-info',
                 self._on_howpage,
-                tooltip='Visit Tomate home page')
+                tooltip=_('Visit Tomate home page'))
 
         bottombox = gtk.HBox(False, 0)
         bottombox.pack_start(quotelabel, False, False)

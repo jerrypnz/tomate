@@ -1,0 +1,102 @@
+# Chinese translations for tomate package
+# tomate 软件包的简体中文翻译.
+# Copyright (C) 2012 Jerry Peng
+# This file is distributed under the same license as the tomate package.
+# jerry <pr2jerry@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tomate \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-02-29 16:52+0800\n"
+"PO-Revision-Date: 2012-02-29 16:24+0800\n"
+"Last-Translator: jerry <pr2jerry@gmail.com>\n"
+"Language-Team: Chinese (simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .././data/tomate.desktop.in.h:1
+msgid "Tomate is a tool for pomodoro technique"
+msgstr "Tomate是一个基于番茄工作法的时间管理工具"
+
+#: .././tomate/ui.py:41
+msgid "ToDo"
+msgstr "待办"
+
+#: .././tomate/ui.py:42
+msgid "Plan"
+msgstr "计划"
+
+#: .././tomate/ui.py:43
+msgid "History"
+msgstr "历史"
+
+#: .././tomate/ui.py:69
+msgid "Tomate preferences"
+msgstr "Tomate首选项"
+
+#: .././tomate/ui.py:74
+msgid "Visit Tomate home page"
+msgstr "访问Tomate主页"
+
+#: .././tomate/activity.py:49
+msgid "Mark the selected activity as finished"
+msgstr "将选中的任务标记为完成"
+
+#: .././tomate/activity.py:54
+msgid "Remove the selected activity"
+msgstr "删除选中的任务"
+
+#: .././tomate/activity.py:93 .././tomate/history.py:85
+msgid "Activity"
+msgstr "任务"
+
+#: .././tomate/activity.py:160
+msgid "Please select an activity"
+msgstr "请选择一个任务"
+
+#: .././tomate/activity.py:175
+msgid "Start a tomato timer and work on selected activity"
+msgstr "启动番茄计时器并开始选中的任务"
+
+#: .././tomate/activity.py:180
+msgid "Move the selected activity to the plan list for later processing"
+msgstr "将选中的任务移动到计划中以便以后再处理"
+
+#: .././tomate/activity.py:219
+msgid "Tomato Finished"
+msgstr "番茄计时器结束"
+
+#: .././tomate/activity.py:221
+msgid "Tomato Interrupted"
+msgstr "番茄计时器被中断"
+
+#: .././tomate/activity.py:240
+msgid "Move the selected activity to current ToDo list"
+msgstr "将选中任务移动到待办事项中"
+
+#: .././tomate/activity.py:283 .././tomate/activity.py:287
+msgid "Interrupt"
+msgstr "打断"
+
+#: .././tomate/history.py:79
+msgid "Time Range"
+msgstr "时间范围"
+
+#: .././tomate/history.py:98
+msgid "Finished Activity"
+msgstr "已完成的任务"
+
+#: .././tomate/history.py:116
+msgid "Tomatoes"
+msgstr "番茄"
+
+#: .././tomate/history.py:117
+msgid "Interruptions"
+msgstr "中断"
+
+#: .././tomate/history.py:118
+msgid "Finished Activities"
+msgstr "已完成任务"

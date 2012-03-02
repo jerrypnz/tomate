@@ -1,0 +1,10 @@
+./data/tomate.desktop.in
+./tomate/ui.py
+./tomate/timequotes.py
+./tomate/uimodel.py
+./tomate/config.py
+./tomate/model.py
+./tomate/activity.py
+./tomate/history.py
+./tomate/util.py
+./tomate/__init__.py
