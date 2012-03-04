@@ -28,6 +28,7 @@ import gobject
 from tomate import model
 from tomate import util
 from tomate.uimodel import ActivityStore
+from tomate.config import conf
 
 class BaseActivityView(gtk.VBox):
     """Base class for activity views"""
@@ -37,7 +38,8 @@ class BaseActivityView(gtk.VBox):
         self.priority = priority
         self.act_name = gtk.Entry()
         self.act_name.set_property('secondary-icon-stock', gtk.STOCK_ADD)
-        self.act_name.set_property('secondary-icon-tooltip-text', 'Add new activity')
+        self.act_name.set_property('secondary-icon-tooltip-text',
+                'Add new activity')
         self.act_name.set_property('secondary-icon-activatable', True)
         self.act_name.connect('activate', self._on_add)
         self.act_name.connect('icon-press', self._on_add)
@@ -277,6 +279,8 @@ class TimerDialog(gtk.Window):
         self.seconds = 0
         self.set_title(activity.name)
         self.set_resizable(False)
+        if conf.timer_topmost:
+            self.set_keep_above(True)
 
         self.time_label = gtk.Label()
         self.time_label.set_tooltip_text(activity.name)

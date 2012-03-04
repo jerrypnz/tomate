@@ -29,6 +29,7 @@ class Config(object):
         super(Config, self).__init__()
         self.conf_dir = os.path.expanduser('~/.tomate/')
         self.db_file = 'data.db'
+        self.timer_topmost = True
         self._create_conf_dir()
 
     def _create_conf_dir(self):
