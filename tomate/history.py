@@ -55,7 +55,7 @@ class HistoryView(gtk.HPaned):
 
         box1 = gtk.VBox(False, 0)
         box1.pack_start(self.calendar, False, False, padding=5)
-        box1.pack_start(self.statistics, False, False, padding=20)
+        box1.pack_start(self.statistics, False, False, padding=15)
 
         box2 = gtk.HBox(False, 0)
         box2.pack_start(box1, True, True, padding=5)

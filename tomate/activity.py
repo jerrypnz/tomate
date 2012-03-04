@@ -281,28 +281,33 @@ class TimerDialog(gtk.Window):
         self.set_resizable(False)
         if conf.timer_topmost:
             self.set_keep_above(True)
-
+        self.set_border_width(3)
         self.time_label = gtk.Label()
         self.time_label.set_tooltip_text(activity.name)
-        self.interrupt_button = gtk.Button(_('Interrupt'))
-        self.interrupt_button.set_image(gtk.image_new_from_icon_name(
-                    'media-playback-stop',
-                    gtk.ICON_SIZE_BUTTON))
-        self.interrupt_button.set_tooltip_text(_('Interrupt'))
-        self.interrupt_button.connect('clicked', self._on_interrupt)
+        interrupt_button = gtk.Button(_('Interrupt'))
+        interrupt_button.set_tooltip_text(_('Interrupt'))
+        interrupt_button.set_relief(gtk.RELIEF_HALF)
+        interrupt_button.connect('clicked', self._on_interrupt)
         self.connect('delete-event', self._on_interrupt)
+
         box = gtk.VBox(False, 0)
         box.pack_start(self.time_label, False, False)
-        box.pack_end(self.interrupt_button, False, False)
+        box.pack_end(interrupt_button, False, False)
         self.add(box)
         self._show_time()
+
+        # Place the window to the bottom-right corner
+        self.set_gravity(gtk.gdk.GRAVITY_SOUTH_EAST)
+        w, h = self.get_size()
+        self.move(gtk.gdk.screen_width() - w, gtk.gdk.screen_height() - h)
+
         self._timeout_id = gobject.timeout_add(1000, self._update_time)
 
     def _show_time(self):
         color_idx = (self.total_minutes - self.minutes) * (len(self.TEXT_COLORS) - 1) / self.total_minutes
         color = self.TEXT_COLORS[color_idx]
         self.time_label.set_markup('''<span
-                size="50000"
+                size="40000"
                 weight="bold"
                 foreground="%s">%02d:%02d</span>'''
                 % (color, self.minutes, self.seconds))
