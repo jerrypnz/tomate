@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Tomate
-Comment=Tomate is a tool for pomodoro technique
+_Comment=Tomate is a tool for pomodoro technique
 Exec=tomate
 Icon=stock_task
 Terminal=false
