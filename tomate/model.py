@@ -27,6 +27,7 @@ import datetime
 import calendar
 import sqlite3 as sqlite
 import os.path
+import itertools
 
 class TomatoError(Exception):
     pass
@@ -38,6 +39,9 @@ PLANNED = 1
 RUNNING = 0
 FINISHED = 1
 INTERRUPTED = 2
+
+def now():
+    return round(time.time())
 
 class Activity(object):
     """Activity class"""
@@ -61,7 +65,7 @@ class Activity(object):
     def finish(self):
         if self.finish_time:
             raise TomatoError("Activity is already finished")
-        self.finish_time = time.time()
+        self.finish_time = now()
 
     def unfinish(self):
         self.finish_time = None
@@ -70,8 +74,18 @@ class Activity(object):
         return self.finish_time != None
 
     def __repr__(self):
-        return 'Activity[id=%s, name=%s, priority=%s, tomatoes=%s, interrupts=%s, finish_time=%s]' % (
-                self.id, self.name, self.priority, self.tomatoes, self.interrupts, self.finish_time
+        return '''Activity[id=%s,
+                    name=%s,
+                    priority=%s,
+                    tomatoes=%s,
+                    interrupts=%s,
+                    finish_time=%s]''' % (
+                self.id,
+                self.name,
+                self.priority,
+                self.tomatoes,
+                self.interrupts,
+                self.finish_time
                 )
 
 
@@ -90,27 +104,37 @@ class Tomato(object):
         self.description = desc
         self.duration = duration
         self.state = RUNNING
-        self.start_time = time.time()
+        self.start_time = now()
         self.end_time = self.start_time + duration * 60
 
     def interrupt(self):
-        current_time = time.time()
+        current_time = now()
         if current_time >= self.end_time:
             raise TomatoError("The tomato is ended")
         self.state = INTERRUPTED
-        self.end_time = time.time()
+        self.end_time = now()
         self.activity.add_interrupt()
 
     def finish(self):
-        current_time = time.time()
+        current_time = now()
         if current_time < self.end_time:
             raise TomatoError("Not finished yet")
         self.state = FINISHED
         self.activity.add_tomato()
 
     def __repr__(self):
-        return 'Tomato[id=%s, act=%s, duration=%s, stat=%s, start_time=%s, end_time=%s]' % (
-                    self.id, self.name, self.duration, self.state, self.start_time, self.end_time
+        return '''Tomato[id=%s,
+                    act=%s,
+                    duration=%s,
+                    stat=%s,
+                    start_time=%s,
+                    end_time=%s]''' % (
+                    self.id,
+                    self.name,
+                    self.duration,
+                    self.state,
+                    self.start_time,
+                    self.end_time
                 )
 
 
@@ -122,7 +146,7 @@ def open_store():
 def datetime2secs(dt):
     '''Convert a datetime object to seconds since epoch in UTC'''
     if isinstance(dt, datetime.datetime):
-        return time.mktime(dt.utctimetuple())
+        return round(time.mktime(dt.utctimetuple()))
     else:
         return dt
 
@@ -392,10 +416,40 @@ class SqliteStore(object):
         time2 = datetime2secs(time2)
         cur = self.conn.cursor()
         cur.execute('''select %s from tomato
-                where start_time>=? and start_time<? and state!=?''' % self.TOMATO_ROWS,
+                where start_time>=? and start_time<?
+                and state!=?''' % self.TOMATO_ROWS,
                 (time1, time2, RUNNING))
         return [ self._map_to_tomato(r) for r in cur.fetchall() ]
 
+    def statistics_tomato_count(self, time1, time2):
+        time1 = datetime2secs(time1)
+        time2 = datetime2secs(time2)
+        table = self._empty_table(time1, time2)
+        data = self._count_tomatoes_by_stat(FINISHED, time1, time2)
+        for count, time in data:
+            table[time][0] = count
+        data = self._count_tomatoes_by_stat(INTERRUPTED, time1, time2)
+        for count, time in data:
+            table[time][1] = count
+        result = list(table.items())
+        result.sort()
+        return result
+
+    def _count_tomatoes_by_stat(self, stat, time1, time2):
+        cur = self.conn.cursor()
+        cur.execute('''select count(id),
+                round(start_time - start_time % 86400) as day
+                from tomato
+                where state=?
+                and start_time>=? and start_time<?
+                group by day
+                order by day''', (stat, time1, time2))
+        return cur.fetchall()
+
+    def _empty_table(self, time1, time2):
+        start = time1 - time1 % 86400
+        keys = range(int(start), int(time2), 86400)
+        return dict(itertools.izip(keys, ([0,0] for i in range(len(keys)))))
+
     def close(self):
         self.conn.close()
-

@@ -98,6 +98,10 @@ def test_list_acthistories(st, time1, time2):
     for a in acts:
         print a
 
+def test_statistics_tomato_count(st, time1, time2):
+    print "--------------test statistics-----------------------------"
+    print st.statistics_tomato_count(time1, time2)
+
 def main():
     st = model.SqliteStore('/tmp/test.db')
     time1 = datetime.now()
@@ -122,6 +126,7 @@ def main():
     print "End time: ", model.datetime2secs(time2)
     test_list_tomatoes(st, time1, time2)
     test_list_acthistories(st, time1, time2)
+    test_statistics_tomato_count(st, time1, time2)
     st.close()
 
 if __name__ == '__main__':
