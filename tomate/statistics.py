@@ -24,18 +24,12 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
+import cairo
+import math
+
 from datetime import datetime, date, timedelta, time
 
-from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas
-from matplotlib.figure import Figure
-
 from tomate import model
-
-TABS = [
-        (_('Week'),         'WeekView'),
-        (_('Month'),        'MonthView'),
-        (_('Advanced'),     'AdvancedView'),
-        ]
 
 class StatisticsView(gtk.VBox):
     """Statistics View"""
@@ -44,69 +38,174 @@ class StatisticsView(gtk.VBox):
         self.parent_window = parent_window
         self.store = model.open_store()
         self.connect('destroy', lambda arg : self.store.close())
-        self.notebook = self._setup_tabs()
-        padding = 2
+        self.notebook = WeekView(self.store)
+        padding = 0
         hbox = gtk.HBox(False, 0)
         hbox.pack_start(self.notebook, True, True, padding=padding)
         self.pack_start(hbox, True, True, padding=padding)
-
-    def _setup_tabs(self):
-        notebook = gtk.Notebook()
-        g = globals()
-        for name, clsname in TABS:
-            view = g[clsname](self.store)
-            notebook.append_page(view, gtk.Label(name))
-        return notebook
 
     def refresh(self):
         pass
 
 
-class WeekView(FigureCanvas):
-    """docstring for WeekView"""
+class WeekView(gtk.DrawingArea):
+
+    __gsignals__ = { "expose-event": "override" }
+
     def __init__(self, store):
+        super(WeekView, self).__init__()
+        self.set_size_request(500, 400)
         today = date.today()
         weekday = today.weekday()
         start_day = today - timedelta(days=weekday)
         end_day = today + timedelta(days=6-weekday-1)
         start_time = datetime.combine(start_day, time(0, 0, 0))
         end_time = datetime.combine(end_day, time(23, 59, 59))
-        f = self._generate_figure(store, start_time, end_time)
-        super(WeekView, self).__init__(f)
-        self.show()
+        data = store.statistics_tomato_count(start_time, end_time)
+        self.data = [(datetime.fromtimestamp(t).strftime('%A'), d)
+                for t, d in data]
 
-    def _generate_figure(self, store, time1, time2):
-        statistics = store.statistics_tomato_count(time1, time2)
-        dates = [datetime.fromtimestamp(a[0]).date() for a in statistics]
-        finish_counts = [a[1][0] for a in statistics]
-        interrupt_counts = [a[1][1] for a in statistics]
-        f = Figure(figsize=(6, 5), dpi=60)
-        ax = f.add_subplot(111)
-        width = 0.3
-        tomato_legend = ax.bar(dates, finish_counts,
-                width=width,
-                color='#92F792',
-                label=_('Tomatoes'))
-        interrupt_legend = ax.bar(dates, interrupt_counts,
-                bottom=finish_counts,
-                width=width,
-                color='#F79292',
-                label=_('Interruptions'))
-        ax.legend(loc=2)
-        ax.set_xticks(dates)
-        ax.set_xticklabels([d.strftime("%a") for d in dates], ha='right')
-        ax.set_xlabel(_('Weekday'))
-        ax.set_ylabel(_('Number of Tomatoes'))
-        return f
+    def do_expose_event(self, event):
+        cr = self.window.cairo_create()
+        cr.rectangle(event.area.x, event.area.y,
+                event.area.width, event.area.height)
+        cr.clip()
+        self.draw(cr, *self.window.get_size())
+
+    def draw(self, cr, width, height):
+        renderer = BarGraphRenderer(cr, width, height, self.data)
+        renderer.render()
 
 
-class MonthView(gtk.Label):
-    """docstring for MonthView"""
-    def __init__(self, store):
-        super(MonthView, self).__init__('Month View')
+class BarGraphRenderer(object):
+    BG_COLOR = (0.9, 0.9, 0.9)
+    BORDER_COLOR = (0.2, 0.2, 0.2)
+    FG_COLOR = (1, 1, 1)
+    V1_COLOR1 = (0.7, 0.8, 0.7)
+    V1_COLOR2 = (0.4, 1.0, 0.3)
+    V2_COLOR2 = (0.8, 0.7, 0.7)
+    V2_COLOR2 = (1.0, 0.4, 0.3)
+    TICK_LEN = 3
+    LEGEND_WIDTH = 30
+    LEGEND_HEIGHT = 13
 
+    def __init__(self, ctx, width, height, data):
+        super(BarGraphRenderer, self).__init__()
+        self.ctx = ctx
+        self.x_reserv = width / 20
+        self.width = width
+        self.height = height
+        self.data = data
 
-class AdvancedView(gtk.Label):
-    """docstring for AdvancedView"""
-    def __init__(self, store):
-        super(AdvancedView, self).__init__('Advanced View')
+    def rad_gradient(self, color1, color2):
+        radial = cairo.RadialGradient(0.2, 0.2, 0.1, 0.5, 0.5, 0.6)
+        radial.add_color_stop_rgb(0, *color1)
+        radial.add_color_stop_rgb(1, *color2)
+        return radial
+
+    def render(self):
+        self.v1_gradient = self.rad_gradient(self.V1_COLOR1, self.V1_COLOR2)
+        self.v2_gradient = self.rad_gradient(self.V2_COLOR2, self.V2_COLOR2)
+        self._calculate()
+        self._draw_background(self.ctx)
+        self._draw_cordinates(self.ctx)
+        self._draw_bars(self.ctx)
+        self._draw_legends(self.ctx)
+
+    def _calculate(self):
+        self.border_width = 45
+        self.graph_width = self.width - 2 * self.border_width
+        self.graph_height = self.height - 2 * self.border_width
+        self.x_max = len(self.data)
+        self.y_max = max([max(d) for l, d in self.data]) + 2
+        self.x_tick_span = (self.graph_width - self.x_reserv) / self.x_max + 2
+        self.x_ticks = range(self.x_reserv, self.graph_width, self.x_tick_span)
+        self.y_tick_span = self.graph_height / self.y_max + 2
+        self.y_ticks = range(0, self.graph_height, self.y_tick_span)
+
+    def _draw_background(self, cr):
+        cr.set_source_rgb(*self.BG_COLOR)
+        cr.rectangle(0, 0, self.width, self.height)
+        cr.fill()
+        cr.set_source_rgb(*self.FG_COLOR)
+        cr.rectangle(self.border_width,
+                self.border_width,
+                self.width - 2 * self.border_width,
+                self.height - 2 * self.border_width)
+        cr.fill_preserve()
+        cr.set_line_width(0.2)
+        cr.set_source_rgb(*self.BORDER_COLOR)
+        cr.stroke()
+        cr.translate(self.border_width, self.border_width)
+
+    def _draw_cordinates(self, cr):
+        cr.set_source_rgb(*self.BORDER_COLOR)
+        for i, x_tick in enumerate(self.x_ticks):
+            cr.move_to(x_tick, self.graph_height)
+            cr.line_to(x_tick, self.graph_height - 2)
+            cr.move_to(x_tick - self.TICK_LEN, self.graph_height + 10)
+            cr.show_text(self.data[i][0])
+        cr.move_to(self.graph_width / 2 - 30, self.graph_height + 30)
+        cr.show_text('Weekdays')
+        for i, y_tick in enumerate(self.y_ticks[1:], 1):
+            cr.move_to(0, self.graph_height - y_tick)
+            cr.line_to(self.TICK_LEN, self.graph_height - y_tick)
+            cr.move_to(self.graph_width, self.graph_height - y_tick)
+            cr.line_to(self.graph_width - 3, self.graph_height - y_tick)
+            cr.move_to(-20, self.graph_height - y_tick)
+            cr.show_text(str(i))
+        cr.stroke()
+        cr.move_to(-30, self.graph_height / 2 + 30)
+        cr.save()
+        text_matrix = cr.get_font_matrix()
+        text_matrix.rotate(-math.pi * 0.5)
+        cr.set_font_matrix(text_matrix)
+        cr.show_text('Number of Tomatoes')
+        cr.restore()
+
+    def _draw_bars(self, cr):
+        bar_width = self.x_tick_span / 3
+        for i, (l, (v1, v2)) in enumerate(self.data):
+            v1_bar_height = max(self.y_tick_span * v1, 1)
+            v2_bar_height = max(self.y_tick_span * v2, 1)
+            cr.set_source(self.v1_gradient)
+            cr.rectangle(self.x_ticks[i] - bar_width,
+                    self.graph_height - v1_bar_height,
+                    bar_width,
+                    v1_bar_height)
+            cr.fill_preserve()
+            cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
+            cr.stroke()
+            cr.set_source(self.v2_gradient)
+            cr.rectangle(self.x_ticks[i],
+                    self.graph_height - v2_bar_height,
+                    bar_width,
+                    v2_bar_height)
+            cr.fill_preserve()
+            cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
+            cr.stroke()
+
+    def _draw_legends(self, cr):
+        cr.translate(0, 0)
+        cr.rectangle(self.LEGEND_WIDTH,
+                self.LEGEND_HEIGHT,
+                self.LEGEND_WIDTH,
+                self.LEGEND_HEIGHT)
+        cr.set_source(self.v1_gradient)
+        cr.fill_preserve()
+        cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
+        cr.stroke()
+        cr.rectangle(self.LEGEND_WIDTH * 5,
+                self.LEGEND_HEIGHT,
+                self.LEGEND_WIDTH,
+                self.LEGEND_HEIGHT)
+        cr.set_source(self.v2_gradient)
+        cr.fill_preserve()
+        cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
+        cr.stroke()
+        cr.set_source_rgb(*self.BORDER_COLOR)
+        cr.move_to(self.LEGEND_WIDTH * 2 + 10, self.LEGEND_HEIGHT + 10)
+        cr.show_text('Finished')
+        cr.move_to(self.LEGEND_WIDTH * 6 + 10, self.LEGEND_HEIGHT + 10)
+        cr.show_text('Interruptions')
+
