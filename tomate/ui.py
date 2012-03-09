@@ -32,7 +32,6 @@ from tomate import util
 
 from tomate.activity import TodoView, PlanView
 from tomate.history import HistoryView
-from tomate.statistics import StatisticsView
 
 icontheme = gtk.icon_theme_get_default()
 
@@ -42,7 +41,6 @@ PAGES = [
         (_('ToDo'),        'TodoView',          'stock_task'),
         (_('Plan'),        'PlanView',          'stock_notes'),
         (_('History'),     'HistoryView',       'stock_calendar'),
-        (_('Statistics'),  'StatisticsView',    'stock_calendar'),
     ]
 
 

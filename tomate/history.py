@@ -25,9 +25,12 @@ pygtk.require('2.0')
 import gtk
 
 from datetime import date
-from tomate.uimodel import FinishedTomatoModel, FinishedActivityModel
+from tomate.uimodel import FinishedTomatoModel
+from tomate.uimodel import FinishedActivityModel
+from tomate.uimodel import WeeklyStatisticsModel
+from tomate.statistics import WeeklyGraph
 
-class HistoryView(gtk.HPaned):
+class HistoryView(gtk.VPaned):
     """Activity history view"""
     def __init__(self, parent_window):
         super(HistoryView, self).__init__()
@@ -35,33 +38,28 @@ class HistoryView(gtk.HPaned):
         self.calendar = gtk.Calendar()
         self.tomato_view = self._create_tomato_view()
         self.tomato_model = self.tomato_view.get_model()
-        self.act_view = self._create_activity_view()
-        self.act_model = self.act_view.get_model()
-        self.statistics = gtk.Label()
-        self.statistics.set_justify(gtk.JUSTIFY_RIGHT)
-
-        act_wnd = gtk.ScrolledWindow()
-        act_wnd.add(self.act_view)
-        act_wnd.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        act_wnd.set_size_request(-1, 130)
+        self.stat_model = WeeklyStatisticsModel()
+        self.stat_graph = WeeklyGraph(self.stat_model)
 
         tomato_wnd = gtk.ScrolledWindow()
         tomato_wnd.add(self.tomato_view)
         tomato_wnd.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        pane = gtk.VPaned()
-        pane.pack1(act_wnd, shrink=False)
-        pane.pack2(tomato_wnd, shrink=False)
-
         box1 = gtk.VBox(False, 0)
-        box1.pack_start(self.calendar, False, False, padding=5)
-        box1.pack_start(self.statistics, False, False, padding=15)
+        box1.pack_start(self.calendar, True, False, padding=5)
 
         box2 = gtk.HBox(False, 0)
-        box2.pack_start(box1, True, True, padding=5)
+        box2.pack_start(box1, True, False, padding=5)
 
-        self.pack1(box2, shrink=False)
-        self.pack2(pane, shrink=False)
+        box3 = gtk.VBox(False, 0)
+        box3.pack_start(tomato_wnd, True, True, padding=5)
+
+        pane = gtk.HPaned()
+        pane.pack1(box2, shrink=False)
+        pane.pack2(box3, shrink=False)
+
+        self.pack1(pane, shrink=False)
+        self.pack2(self.stat_graph, shrink=False)
 
         self._on_day_changed(self.calendar)
         self.calendar.connect('day-selected', self._on_day_changed)
@@ -90,16 +88,6 @@ class HistoryView(gtk.HPaned):
         view.append_column(activity_col)
         return view
 
-    def _create_activity_view(self):
-        view = gtk.TreeView()
-        model = FinishedActivityModel()
-        view.set_model(model)
-        finish_col = gtk.TreeViewColumn('#', gtk.CellRendererToggle(), active=0)
-        activity_col = gtk.TreeViewColumn(_('Finished Activity'), gtk.CellRendererText(), text=1)
-        view.append_column(finish_col)
-        view.append_column(activity_col)
-        return view
-
     def refresh(self):
         self._on_day_changed(self.calendar)
 
@@ -108,14 +96,5 @@ class HistoryView(gtk.HPaned):
         #The month is 0-based, so we need to add 1 to it
         selected_day = date(y, m + 1, d)
         tomato_count, interruption_count = self.tomato_model.load_finished_tomatoes(selected_day)
-        finished_act_count = self.act_model.load_finished_activities(selected_day)
-        markup = '''
-        <span foreground="#32CD32">%s: %-s</span>
-        <span foreground="#CD3232">%s: %-s</span>
-        %s: %-s''' % (
-            _('Tomatoes'), tomato_count,
-            _('Interruptions'), interruption_count,
-            _('Finished Activities'), finished_act_count,
-            )
-        self.statistics.set_markup(markup)
+        self.stat_model.reload_data(selected_day)
 

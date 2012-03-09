@@ -28,23 +28,7 @@ import cairo
 import math
 
 from datetime import datetime, date, timedelta, time
-
 from tomate.uimodel import WeeklyStatisticsModel
-
-class StatisticsView(gtk.VBox):
-    """Statistics View"""
-    def __init__(self, parent_window):
-        super(StatisticsView, self).__init__(False, 0)
-        self.parent_window = parent_window
-        self.stat_model = WeeklyStatisticsModel()
-        self.graph = WeeklyGraph(self.stat_model)
-        padding = 1
-        hbox = gtk.HBox(False, 0)
-        hbox.pack_start(self.graph, True, True, padding=padding)
-        self.pack_start(hbox, True, True, padding=padding)
-
-    def refresh(self):
-        self.graph.refresh()
 
 
 class WeeklyGraph(gtk.DrawingArea):
@@ -54,45 +38,58 @@ class WeeklyGraph(gtk.DrawingArea):
     def __init__(self, model):
         super(WeeklyGraph, self).__init__()
         self.model = model
+        self.model.connect('data-updated', self._on_data_reloaded)
         self.set_size_request(500, 400)
         self.date = date.today()
+        self.cr = None
+        self.day_idx = None
 
     def select_day(self, date):
         self.date = date
-        self.refresh()
+        self.model.reload_data(self.date)
 
     def refresh(self):
-        self.model.reload_data(self.date)
+        self.model.reload_data(self.date, force=True)
 
     def do_expose_event(self, event):
         cr = self.window.cairo_create()
         cr.rectangle(event.area.x, event.area.y,
                 event.area.width, event.area.height)
         cr.clip()
+        self.cr = cr
         self.draw(cr, *self.window.get_size())
 
     def draw(self, cr, width, height):
-        renderer = BarGraphRenderer(cr, width, height, self.model.get_data())
+        renderer = BarGraphRenderer(cr, width, height,
+                self.model.get_data(), self.day_idx)
         renderer.render()
+
+    def _on_data_reloaded(self, obj, day_idx):
+        self.day_idx = day_idx
+        if self.window:
+            self.queue_draw_area(0, 0, *self.window.get_size())
 
 
 class BarGraphRenderer(object):
     BG_COLOR = (0.9, 0.9, 0.9)
     BORDER_COLOR = (0.0, 0.0, 0.0)
     FG_COLOR = (1, 1, 1)
-    V1_COLOR = (0.32, 0.75, 0.00)
-    V2_COLOR = (0.89, 0.35, 0.16)
+    V1_COLOR = (0.67, 0.96, 0.67)
+    V1_HI_COLOR = (0.32, 0.75, 0.00)
+    V2_COLOR = (0.96, 0.67, 0.67)
+    V2_HI_COLOR = (0.89, 0.35, 0.16)
     TICK_LEN = 3
     LEGEND_WIDTH = 30
     LEGEND_HEIGHT = 13
 
-    def __init__(self, ctx, width, height, data):
+    def __init__(self, ctx, width, height, data, highlight):
         super(BarGraphRenderer, self).__init__()
         self.ctx = ctx
         self.x_reserv = width / 20
         self.width = width
         self.height = height
         self.data = data
+        self.highlight = highlight
 
     def rad_gradient(self, color1, color2):
         radial = cairo.LinearGradient(0.0, 0.0, 0.0, self.graph_height)
@@ -111,8 +108,9 @@ class BarGraphRenderer(object):
 
     def _calculate(self):
         self.border_width = 45
+        self.top_border_width = 20
         self.graph_width = self.width - 2 * self.border_width
-        self.graph_height = self.height - 2 * self.border_width
+        self.graph_height = self.height - self.border_width - self.top_border_width
         self.x_max = len(self.data)
         self.y_max = max([max(d) for l, d in self.data]) + 2
         self.x_tick_span = (self.graph_width - self.x_reserv) / self.x_max + 2
@@ -123,21 +121,21 @@ class BarGraphRenderer(object):
     def _draw_background(self, cr):
         cr.set_source_rgb(*self.FG_COLOR)
         cr.rectangle(self.border_width,
-                self.border_width,
+                self.top_border_width,
                 self.width - 2 * self.border_width,
-                self.height - 2 * self.border_width)
+                self.height - self.border_width - self.top_border_width)
         cr.fill_preserve()
         cr.set_line_width(0.4)
         cr.set_source_rgb(*self.BORDER_COLOR)
         cr.stroke()
-        cr.translate(self.border_width, self.border_width)
+        cr.translate(self.border_width, self.top_border_width)
 
     def _draw_cordinates(self, cr):
         cr.set_source_rgb(*self.BORDER_COLOR)
         for i, x_tick in enumerate(self.x_ticks):
             cr.move_to(x_tick, self.graph_height)
             cr.line_to(x_tick, self.graph_height - 2)
-            cr.move_to(x_tick - self.TICK_LEN, self.graph_height + 10)
+            cr.move_to(x_tick - 8, self.graph_height + 10)
             cr.show_text(self.data[i][0])
         cr.move_to(self.graph_width / 2 - 30, self.graph_height + 30)
         cr.show_text('Weekdays')
@@ -146,7 +144,7 @@ class BarGraphRenderer(object):
             cr.line_to(self.TICK_LEN, self.graph_height - y_tick)
             cr.move_to(self.graph_width, self.graph_height - y_tick)
             cr.line_to(self.graph_width - 3, self.graph_height - y_tick)
-            cr.move_to(-20, self.graph_height - y_tick)
+            cr.move_to(-10, self.graph_height - y_tick + 5)
             cr.show_text(str(i))
         cr.stroke()
         cr.move_to(-30, self.graph_height / 2 + 30)
@@ -160,9 +158,15 @@ class BarGraphRenderer(object):
     def _draw_bars(self, cr):
         bar_width = self.x_tick_span / 4
         for i, (l, (v1, v2)) in enumerate(self.data):
+            if self.highlight == i:
+                v1_color = self.V1_HI_COLOR
+                v2_color = self.V2_HI_COLOR
+            else:
+                v1_color = self.V1_COLOR
+                v2_color = self.V2_COLOR
             v1_bar_height = max(self.y_tick_span * v1, 1)
             v2_bar_height = max(self.y_tick_span * v2, 1)
-            cr.set_source_rgb(*self.V1_COLOR)
+            cr.set_source_rgb(*v1_color)
             cr.rectangle(self.x_ticks[i] - bar_width,
                     self.graph_height - v1_bar_height,
                     bar_width,
@@ -170,7 +174,7 @@ class BarGraphRenderer(object):
             cr.fill_preserve()
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
             cr.stroke()
-            cr.set_source_rgb(*self.V2_COLOR)
+            cr.set_source_rgb(*v2_color)
             cr.rectangle(self.x_ticks[i],
                     self.graph_height - v2_bar_height,
                     bar_width,

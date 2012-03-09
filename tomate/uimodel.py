@@ -159,24 +159,37 @@ class FinishedActivityModel(gtk.ListStore):
         return len(act_histories) + len(acts)
 
 
-class WeeklyStatisticsModel(object):
+class WeeklyStatisticsModel(gobject.GObject):
     """Weekly statistics model"""
+
+    __gsignals__ = {
+            'data-updated' : (gobject.SIGNAL_RUN_FIRST,
+                gobject.TYPE_NONE, (int,))
+            }
+
+    WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
     def __init__(self, store=None):
         super(WeeklyStatisticsModel, self).__init__()
         if not store:
             store = model.open_store()
         self.store = store
         self.data = []
+        self.cache_day = None
 
     def get_data(self):
         return self.data
 
-    def reload_data(self, date):
+    def reload_data(self, date, force=False):
         weekday = date.weekday()
         start_day = date - timedelta(days=weekday)
-        end_day = date + timedelta(days=6-weekday-1)
-        start_time = datetime.combine(start_day, time(0, 0, 0))
-        end_time = datetime.combine(end_day, time(23, 59, 59))
-        data = self.store.statistics_tomato_count(start_time, end_time)
-        self.data = [(datetime.fromtimestamp(t).strftime('%A'), d)
-                for t, d in data]
+        if force or start_day != self.cache_day:
+            end_day = date + timedelta(days=6-weekday-1)
+            start_time = datetime.combine(start_day, time(0, 0, 0))
+            end_time = datetime.combine(end_day, time(23, 59, 59))
+            data = self.store.statistics_tomato_count(start_time, end_time)
+            self.data = [(self.WEEKDAY_NAMES[datetime.fromtimestamp(t).weekday()], d)
+                    for t, d in data]
+            self.cache_day = start_day
+        self.emit('data-updated', weekday)
+
