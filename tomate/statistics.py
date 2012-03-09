@@ -38,30 +38,33 @@ class StatisticsView(gtk.VBox):
         self.parent_window = parent_window
         self.store = model.open_store()
         self.connect('destroy', lambda arg : self.store.close())
-        self.notebook = WeekView(self.store)
-        padding = 0
+        self.graph = WeeklyGraph(self.store)
+        padding = 1
         hbox = gtk.HBox(False, 0)
-        hbox.pack_start(self.notebook, True, True, padding=padding)
+        hbox.pack_start(self.graph, True, True, padding=padding)
         self.pack_start(hbox, True, True, padding=padding)
 
     def refresh(self):
         pass
 
 
-class WeekView(gtk.DrawingArea):
+class WeeklyGraph(gtk.DrawingArea):
 
     __gsignals__ = { "expose-event": "override" }
 
     def __init__(self, store):
-        super(WeekView, self).__init__()
+        super(WeeklyGraph, self).__init__()
+        self.store = store
         self.set_size_request(500, 400)
-        today = date.today()
-        weekday = today.weekday()
-        start_day = today - timedelta(days=weekday)
-        end_day = today + timedelta(days=6-weekday-1)
+        self.load_data(date.today())
+
+    def load_data(self, day):
+        weekday = day.weekday()
+        start_day = day - timedelta(days=weekday)
+        end_day = day + timedelta(days=6-weekday-1)
         start_time = datetime.combine(start_day, time(0, 0, 0))
         end_time = datetime.combine(end_day, time(23, 59, 59))
-        data = store.statistics_tomato_count(start_time, end_time)
+        data = self.store.statistics_tomato_count(start_time, end_time)
         self.data = [(datetime.fromtimestamp(t).strftime('%A'), d)
                 for t, d in data]
 
@@ -79,12 +82,10 @@ class WeekView(gtk.DrawingArea):
 
 class BarGraphRenderer(object):
     BG_COLOR = (0.9, 0.9, 0.9)
-    BORDER_COLOR = (0.2, 0.2, 0.2)
+    BORDER_COLOR = (0.0, 0.0, 0.0)
     FG_COLOR = (1, 1, 1)
-    V1_COLOR1 = (0.7, 0.8, 0.7)
-    V1_COLOR2 = (0.4, 1.0, 0.3)
-    V2_COLOR2 = (0.8, 0.7, 0.7)
-    V2_COLOR2 = (1.0, 0.4, 0.3)
+    V1_COLOR = (0.32, 0.75, 0.00)
+    V2_COLOR = (0.89, 0.35, 0.16)
     TICK_LEN = 3
     LEGEND_WIDTH = 30
     LEGEND_HEIGHT = 13
@@ -98,15 +99,15 @@ class BarGraphRenderer(object):
         self.data = data
 
     def rad_gradient(self, color1, color2):
-        radial = cairo.RadialGradient(0.2, 0.2, 0.1, 0.5, 0.5, 0.6)
-        radial.add_color_stop_rgb(0, *color1)
-        radial.add_color_stop_rgb(1, *color2)
+        radial = cairo.LinearGradient(0.0, 0.0, 0.0, self.graph_height)
+        radial.add_color_stop_rgb(0, *color2)
+        radial.add_color_stop_rgb(1, *color1)
         return radial
 
     def render(self):
-        self.v1_gradient = self.rad_gradient(self.V1_COLOR1, self.V1_COLOR2)
-        self.v2_gradient = self.rad_gradient(self.V2_COLOR2, self.V2_COLOR2)
         self._calculate()
+        self.ctx.select_font_face('Sans')
+        self.ctx.set_font_size(9)
         self._draw_background(self.ctx)
         self._draw_cordinates(self.ctx)
         self._draw_bars(self.ctx)
@@ -124,16 +125,13 @@ class BarGraphRenderer(object):
         self.y_ticks = range(0, self.graph_height, self.y_tick_span)
 
     def _draw_background(self, cr):
-        cr.set_source_rgb(*self.BG_COLOR)
-        cr.rectangle(0, 0, self.width, self.height)
-        cr.fill()
         cr.set_source_rgb(*self.FG_COLOR)
         cr.rectangle(self.border_width,
                 self.border_width,
                 self.width - 2 * self.border_width,
                 self.height - 2 * self.border_width)
         cr.fill_preserve()
-        cr.set_line_width(0.2)
+        cr.set_line_width(0.4)
         cr.set_source_rgb(*self.BORDER_COLOR)
         cr.stroke()
         cr.translate(self.border_width, self.border_width)
@@ -164,11 +162,11 @@ class BarGraphRenderer(object):
         cr.restore()
 
     def _draw_bars(self, cr):
-        bar_width = self.x_tick_span / 3
+        bar_width = self.x_tick_span / 4
         for i, (l, (v1, v2)) in enumerate(self.data):
             v1_bar_height = max(self.y_tick_span * v1, 1)
             v2_bar_height = max(self.y_tick_span * v2, 1)
-            cr.set_source(self.v1_gradient)
+            cr.set_source_rgb(*self.V1_COLOR)
             cr.rectangle(self.x_ticks[i] - bar_width,
                     self.graph_height - v1_bar_height,
                     bar_width,
@@ -176,7 +174,7 @@ class BarGraphRenderer(object):
             cr.fill_preserve()
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
             cr.stroke()
-            cr.set_source(self.v2_gradient)
+            cr.set_source_rgb(*self.V2_COLOR)
             cr.rectangle(self.x_ticks[i],
                     self.graph_height - v2_bar_height,
                     bar_width,
@@ -191,21 +189,21 @@ class BarGraphRenderer(object):
                 self.LEGEND_HEIGHT,
                 self.LEGEND_WIDTH,
                 self.LEGEND_HEIGHT)
-        cr.set_source(self.v1_gradient)
+        cr.set_source_rgb(*self.V1_COLOR)
         cr.fill_preserve()
         cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
         cr.stroke()
-        cr.rectangle(self.LEGEND_WIDTH * 5,
-                self.LEGEND_HEIGHT,
+        cr.rectangle(self.LEGEND_WIDTH,
+                self.LEGEND_HEIGHT * 3,
                 self.LEGEND_WIDTH,
                 self.LEGEND_HEIGHT)
-        cr.set_source(self.v2_gradient)
+        cr.set_source_rgb(*self.V2_COLOR)
         cr.fill_preserve()
         cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
         cr.stroke()
         cr.set_source_rgb(*self.BORDER_COLOR)
         cr.move_to(self.LEGEND_WIDTH * 2 + 10, self.LEGEND_HEIGHT + 10)
         cr.show_text('Finished')
-        cr.move_to(self.LEGEND_WIDTH * 6 + 10, self.LEGEND_HEIGHT + 10)
-        cr.show_text('Interruptions')
+        cr.move_to(self.LEGEND_WIDTH * 2 + 10, self.LEGEND_HEIGHT * 3 + 10)
+        cr.show_text('Interrupted')
 
