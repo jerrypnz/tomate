@@ -40,10 +40,12 @@ class ActivityStore(gtk.ListStore):
      INTERRUPT_COL,
      ACTIVITY_COL) = range(5)
 
-    def __init__(self, priority=model.TODO):
+    def __init__(self, priority=model.TODO, store=None):
         super(ActivityStore, self).__init__(str, bool, int, int, gobject.TYPE_PYOBJECT)
         self.priority = priority
-        self.store = model.open_store()
+        if not store:
+            store = model.open_store()
+        self.store = store
 
     def _append_activity(self, act):
         self.append([act.name,
@@ -112,14 +114,17 @@ def day_range(date):
     end_time = start_time + timedelta(days=1)
     return (start_time, end_time)
 
+
 class FinishedTomatoModel(gtk.ListStore):
     (TIME_COL,
      ACTIVITY_COL,
      INTERRUPTED_COL) = range(3)
 
-    def __init__(self):
+    def __init__(self, store=None):
         super(FinishedTomatoModel, self).__init__(str, str, bool)
-        self.store = model.open_store()
+        if not store:
+            store = model.open_store()
+        self.store = store
 
     def load_finished_tomatoes(self, date):
         start_time, end_time = day_range(date)
@@ -138,9 +143,11 @@ class FinishedTomatoModel(gtk.ListStore):
 
 class FinishedActivityModel(gtk.ListStore):
     """List model for Activity history"""
-    def __init__(self):
+    def __init__(self, store=None):
         super(FinishedActivityModel, self).__init__(bool, str)
-        self.store = model.open_store()
+        if not store:
+            store = model.open_store()
+        self.store = store
 
     def load_finished_activities(self, date):
         start_time, end_time = day_range(date)
@@ -151,3 +158,25 @@ class FinishedActivityModel(gtk.ListStore):
             self.append((True, act.name))
         return len(act_histories) + len(acts)
 
+
+class WeeklyStatisticsModel(object):
+    """Weekly statistics model"""
+    def __init__(self, store=None):
+        super(WeeklyStatisticsModel, self).__init__()
+        if not store:
+            store = model.open_store()
+        self.store = store
+        self.data = []
+
+    def get_data(self):
+        return self.data
+
+    def reload_data(self, date):
+        weekday = date.weekday()
+        start_day = date - timedelta(days=weekday)
+        end_day = date + timedelta(days=6-weekday-1)
+        start_time = datetime.combine(start_day, time(0, 0, 0))
+        end_time = datetime.combine(end_day, time(23, 59, 59))
+        data = self.store.statistics_tomato_count(start_time, end_time)
+        self.data = [(datetime.fromtimestamp(t).strftime('%A'), d)
+                for t, d in data]

@@ -29,44 +29,40 @@ import math
 
 from datetime import datetime, date, timedelta, time
 
-from tomate import model
+from tomate.uimodel import WeeklyStatisticsModel
 
 class StatisticsView(gtk.VBox):
     """Statistics View"""
     def __init__(self, parent_window):
         super(StatisticsView, self).__init__(False, 0)
         self.parent_window = parent_window
-        self.store = model.open_store()
-        self.connect('destroy', lambda arg : self.store.close())
-        self.graph = WeeklyGraph(self.store)
+        self.stat_model = WeeklyStatisticsModel()
+        self.graph = WeeklyGraph(self.stat_model)
         padding = 1
         hbox = gtk.HBox(False, 0)
         hbox.pack_start(self.graph, True, True, padding=padding)
         self.pack_start(hbox, True, True, padding=padding)
 
     def refresh(self):
-        pass
+        self.graph.refresh()
 
 
 class WeeklyGraph(gtk.DrawingArea):
 
     __gsignals__ = { "expose-event": "override" }
 
-    def __init__(self, store):
+    def __init__(self, model):
         super(WeeklyGraph, self).__init__()
-        self.store = store
+        self.model = model
         self.set_size_request(500, 400)
-        self.load_data(date.today())
+        self.date = date.today()
 
-    def load_data(self, day):
-        weekday = day.weekday()
-        start_day = day - timedelta(days=weekday)
-        end_day = day + timedelta(days=6-weekday-1)
-        start_time = datetime.combine(start_day, time(0, 0, 0))
-        end_time = datetime.combine(end_day, time(23, 59, 59))
-        data = self.store.statistics_tomato_count(start_time, end_time)
-        self.data = [(datetime.fromtimestamp(t).strftime('%A'), d)
-                for t, d in data]
+    def select_day(self, date):
+        self.date = date
+        self.refresh()
+
+    def refresh(self):
+        self.model.reload_data(self.date)
 
     def do_expose_event(self, event):
         cr = self.window.cairo_create()
@@ -76,7 +72,7 @@ class WeeklyGraph(gtk.DrawingArea):
         self.draw(cr, *self.window.get_size())
 
     def draw(self, cr, width, height):
-        renderer = BarGraphRenderer(cr, width, height, self.data)
+        renderer = BarGraphRenderer(cr, width, height, self.model.get_data())
         renderer.render()
 
 
