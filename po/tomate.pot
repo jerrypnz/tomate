@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Copyright (C) 2012 Jerry Peng
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-29 17:07+0800\n"
+"Project-Id-Version: tomate \n"
+"Report-Msgid-Bugs-To: https://github.com/moonranger/tomate\n"
+"POT-Creation-Date: 2012-03-10 17:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,86 +17,86 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .././data/tomate.desktop.in.h:1
-msgid "Tomate is a tool for pomodoro technique"
-msgstr ""
-
-#: .././tomate/ui.py:41
+#: tomate/ui.py:42
 msgid "ToDo"
 msgstr ""
 
-#: .././tomate/ui.py:42
+#: tomate/ui.py:43
 msgid "Plan"
 msgstr ""
 
-#: .././tomate/ui.py:43
+#: tomate/ui.py:44
 msgid "History"
 msgstr ""
 
-#: .././tomate/ui.py:69
-msgid "Tomate preferences"
+#: tomate/ui.py:73
+msgid "Preferences"
 msgstr ""
 
-#: .././tomate/ui.py:74
-msgid "Visit Tomate home page"
+#: tomate/ui.py:78
+msgid "About Tomate"
 msgstr ""
 
-#: .././tomate/activity.py:49
+#: tomate/ui.py:161
+msgid "Jerry Peng <pr2jerry@gmail.com>"
+msgstr ""
+
+#: tomate/ui.py:162
+msgid "Tomate is a time management tool inspired by the pomodoro technique"
+msgstr ""
+
+#: tomate/ui.py:168 tomate/ui.py:169
+msgid "Tomate"
+msgstr ""
+
+#: tomate/ui.py:174
+msgid "Homepage on github"
+msgstr ""
+
+#: tomate/activity.py:51
 msgid "Mark the selected activity as finished"
 msgstr ""
 
-#: .././tomate/activity.py:54
+#: tomate/activity.py:56
 msgid "Remove the selected activity"
 msgstr ""
 
-#: .././tomate/activity.py:93 .././tomate/history.py:85
+#: tomate/activity.py:95 tomate/history.py:80
 msgid "Activity"
 msgstr ""
 
-#: .././tomate/activity.py:160
+#: tomate/activity.py:162
 msgid "Please select an activity"
 msgstr ""
 
-#: .././tomate/activity.py:175
+#: tomate/activity.py:177
 msgid "Start a tomato timer and work on selected activity"
 msgstr ""
 
-#: .././tomate/activity.py:180
+#: tomate/activity.py:182
 msgid "Move the selected activity to the plan list for later processing"
 msgstr ""
 
-#: .././tomate/activity.py:219
+#: tomate/activity.py:221
 msgid "Tomato Finished"
 msgstr ""
 
-#: .././tomate/activity.py:221
+#: tomate/activity.py:223
 msgid "Tomato Interrupted"
 msgstr ""
 
-#: .././tomate/activity.py:240
+#: tomate/activity.py:242
 msgid "Move the selected activity to current ToDo list"
 msgstr ""
 
-#: .././tomate/activity.py:283 .././tomate/activity.py:287
+#: tomate/activity.py:287 tomate/activity.py:288
 msgid "Interrupt"
 msgstr ""
 
-#: .././tomate/history.py:79
+#: tomate/history.py:74
 msgid "Time Range"
 msgstr ""
 
-#: .././tomate/history.py:98
-msgid "Finished Activity"
-msgstr ""
-
-#: .././tomate/history.py:116
-msgid "Tomatoes"
-msgstr ""
-
-#: .././tomate/history.py:117
-msgid "Interruptions"
-msgstr ""
-
-#: .././tomate/history.py:118
-msgid "Finished Activities"
+#: data/tomate.desktop.in.h:1
+msgid "Tomate is a tool for pomodoro technique"
 msgstr ""

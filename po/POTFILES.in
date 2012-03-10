@@ -3,6 +3,7 @@
 ./tomate/timequotes.py
 ./tomate/uimodel.py
 ./tomate/config.py
+./tomate/chart.py
 ./tomate/model.py
 ./tomate/activity.py
 ./tomate/history.py

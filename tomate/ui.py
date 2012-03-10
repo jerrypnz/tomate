@@ -70,17 +70,17 @@ class MainWindow(gtk.Window):
         option_btn = util.new_small_button(
                 'gtk-preferences',
                 self._on_options,
-                tooltip=_('Tomate preferences'))
+                tooltip=_('Preferences'))
 
-        homepage_btn = util.new_small_button(
+        about_btn = util.new_small_button(
                 'dialog-info',
-                self._on_howpage,
-                tooltip=_('Visit Tomate home page'))
+                self._on_about,
+                tooltip=_('About Tomate'))
 
         bottombox = gtk.HBox(False, 0)
         bottombox.pack_start(quotelabel, False, False)
-        bottombox.pack_end(option_btn, False, False)
-        bottombox.pack_end(homepage_btn, False, False)
+        bottombox.pack_end(about_btn, False, False)
+        #bottombox.pack_end(option_btn, False, False)
 
         mainbox = gtk.VBox(False, 5)
         mainbox.pack_start(mainpane, True, True)
@@ -143,7 +143,7 @@ class MainWindow(gtk.Window):
     def _on_options(self, widget):
         pass
 
-    def _on_howpage(self, widget):
+    def _on_about(self, widget):
         about_dlg = TomateAboutDialog()
         about_dlg.run()
         about_dlg.destroy()
