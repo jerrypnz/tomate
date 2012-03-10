@@ -14,6 +14,7 @@ po/POTFILES.in
 po/zh_CN.po
 tomate/__init__.py
 tomate/activity.py
+tomate/chart.py
 tomate/config.py
 tomate/history.py
 tomate/model.py
