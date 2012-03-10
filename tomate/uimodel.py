@@ -24,10 +24,11 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
-import itertools
+from itertools import izip, chain
 
 from datetime import datetime
 from datetime import time
+from datetime import date
 from datetime import timedelta
 
 from tomate import model
@@ -154,7 +155,7 @@ class FinishedActivityModel(gtk.ListStore):
         act_histories = self.store.list_activity_histories(start_time, end_time)
         acts = self.store.list_finished_activities(start_time, end_time)
         self.clear()
-        for act in itertools.chain(act_histories, acts):
+        for act in chain(act_histories, acts):
             self.append((True, act.name))
         return len(act_histories) + len(acts)
 
@@ -166,8 +167,6 @@ class WeeklyStatisticsModel(gobject.GObject):
             'data-updated' : (gobject.SIGNAL_RUN_FIRST,
                 gobject.TYPE_NONE, (int,))
             }
-
-    WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
     def __init__(self, store=None):
         super(WeeklyStatisticsModel, self).__init__()
@@ -182,14 +181,39 @@ class WeeklyStatisticsModel(gobject.GObject):
 
     def reload_data(self, date, force=False):
         weekday = date.weekday()
-        start_day = date - timedelta(days=weekday)
+        offset = (weekday + 1) % 7 #Make Sunday the first day of a week
+        start_day = date - timedelta(days=offset)
         if force or start_day != self.cache_day:
-            end_day = date + timedelta(days=6-weekday-1)
-            start_time = datetime.combine(start_day, time(0, 0, 0))
-            end_time = datetime.combine(end_day, time(23, 59, 59))
-            data = self.store.statistics_tomato_count(start_time, end_time)
-            self.data = [(self.WEEKDAY_NAMES[datetime.fromtimestamp(t).weekday()], d)
-                    for t, d in data]
+            end_day = date + timedelta(days=6-offset)
+            self.data = self._do_statistics(start_day, end_day)
             self.cache_day = start_day
         self.emit('data-updated', weekday)
 
+    def _do_statistics(self, start_day, end_day):
+        table = self._empty_table(start_day, end_day)
+        time1 = datetime.combine(start_day, time(0, 0, 0))
+        time2 = datetime.combine(end_day, time(23, 59, 59))
+        print "Start time:", time1, "End time:", time2
+        tomato_stats = self.store.list_tomato_states(time1, time2)
+        print "Tomato status:", tomato_stats
+        for stat, start_time, end_time in tomato_stats:
+            day = date.fromtimestamp(start_time)
+            if stat == model.FINISHED:
+                table[day][0] += 1
+            else:
+                table[day][1] += 1
+        result = table.items()
+        result.sort()
+        return [(d.weekday(), val) for d, val in result]
+
+    def _empty_table(self, start_day, end_day):
+        return dict(izip(day_iterator(start_day, end_day),
+                    iter(lambda : [0, 0], [1, 1])))
+
+
+def day_iterator(start_day, end_day):
+    """Convenient day iterator"""
+    day = start_day
+    while day <= end_day:
+        yield day
+        day += timedelta(days=1)

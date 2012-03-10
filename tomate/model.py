@@ -183,7 +183,7 @@ class SqliteStore(object):
         )''',
         )
 
-    ACT_ROWS = '''id
+    ACT_COLS = '''id
         ,name
         ,description
         ,priority
@@ -191,7 +191,7 @@ class SqliteStore(object):
         ,interrupts
         ,finish_time'''
 
-    TOMATO_ROWS = '''id
+    TOMATO_COLS = '''id
         ,name
         ,description
         ,start_time
@@ -308,7 +308,7 @@ class SqliteStore(object):
     def list_activities(self, priority=TODO):
         cur = self.conn.cursor()
         cur.execute('''select %s from activity
-                where priority=?''' % self.ACT_ROWS, (priority,))
+                where priority=?''' % self.ACT_COLS, (priority,))
         return [ self._map_to_activity(r) for r in cur.fetchall() ]
 
     def list_finished_activities(self, time1, time2):
@@ -316,7 +316,7 @@ class SqliteStore(object):
         time2 = datetime2secs(time2)
         cur = self.conn.cursor()
         cur.execute('''select %s from activity
-                where finish_time>=? and finish_time<?''' % self.ACT_ROWS, (time1, time2))
+                where finish_time>=? and finish_time<?''' % self.ACT_COLS, (time1, time2))
         return [ self._map_to_activity(r) for r in cur.fetchall() ]
 
     def list_activity_histories(self, time1, time2):
@@ -324,13 +324,13 @@ class SqliteStore(object):
         time2 = datetime2secs(time2)
         cur = self.conn.cursor()
         cur.execute('''select %s from activity_history
-                where finish_time>=? and finish_time<?''' % self.ACT_ROWS, (time1, time2))
+                where finish_time>=? and finish_time<?''' % self.ACT_COLS, (time1, time2))
         return [ self._map_to_activity(r) for r in cur.fetchall() ]
 
     def archive_activities(self):
         cur = self.conn.cursor()
         cur.execute('''select %s from activity
-                where finish_time is not null''' % self.ACT_ROWS)
+                where finish_time is not null''' % self.ACT_COLS)
         acts = [ self._map_to_activity(r) for r in cur.fetchall() ]
         for act in acts:
             cur.execute('''insert into activity_history(
@@ -355,7 +355,7 @@ class SqliteStore(object):
     def get_activity(self, _id):
         cur = self.conn.cursor()
         cur.execute('''select %s from activity
-                where id=?''' % self.ACT_ROWS, (_id,))
+                where id=?''' % self.ACT_COLS, (_id,))
         r = cur.fetchone()
         if not r:
             return None
@@ -414,12 +414,22 @@ class SqliteStore(object):
     def list_tomatoes(self, time1, time2):
         time1 = datetime2secs(time1)
         time2 = datetime2secs(time2)
+        return [self._map_to_tomato(r) for r in
+                self._select_from_tomatoes(self.TOMATO_COLS, time1, time2)]
+
+    def list_tomato_states(self, time1, time2):
+        time1 = datetime2secs(time1)
+        time2 = datetime2secs(time2)
+        return self._select_from_tomatoes('state, start_time, end_time',
+                time1, time2)
+
+    def _select_from_tomatoes(self, cols, time1, time2):
         cur = self.conn.cursor()
         cur.execute('''select %s from tomato
                 where start_time>=? and start_time<?
-                and state!=?''' % self.TOMATO_ROWS,
+                and state!=?''' % cols,
                 (time1, time2, RUNNING))
-        return [ self._map_to_tomato(r) for r in cur.fetchall() ]
+        return cur.fetchall()
 
     def statistics_tomato_count(self, time1, time2):
         time1 = datetime2secs(time1)

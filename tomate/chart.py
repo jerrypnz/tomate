@@ -31,6 +31,8 @@ from datetime import datetime, date, timedelta, time
 from tomate.uimodel import WeeklyStatisticsModel
 
 
+WEEKDAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
 class WeeklyBarChart(gtk.DrawingArea):
 
     __gsignals__ = { "expose-event": "override" }
@@ -112,7 +114,7 @@ class BarGraphRenderer(object):
         self.graph_width = self.width - 2 * self.border_width
         self.graph_height = self.height - self.border_width - self.top_border_width
         self.x_max = len(self.data)
-        self.y_max = max([max(d) for l, d in self.data]) + 2
+        self.y_max = max([max(vals) for weekday, vals in self.data]) + 2
         self.x_tick_span = (self.graph_width - self.x_reserv) / self.x_max + 2
         self.x_ticks = range(self.x_reserv, self.graph_width, self.x_tick_span)
         self.y_tick_span = self.graph_height / self.y_max + 2
@@ -136,7 +138,8 @@ class BarGraphRenderer(object):
             cr.move_to(x_tick, self.graph_height)
             cr.line_to(x_tick, self.graph_height - 2)
             cr.move_to(x_tick - 8, self.graph_height + 10)
-            cr.show_text(self.data[i][0])
+            label = WEEKDAY_NAMES[self.data[i][0]]
+            cr.show_text(label)
         cr.move_to(self.graph_width / 2 - 30, self.graph_height + 30)
         cr.show_text('Weekdays')
         for i, y_tick in enumerate(self.y_ticks[1:], 1):
@@ -157,8 +160,8 @@ class BarGraphRenderer(object):
 
     def _draw_bars(self, cr):
         bar_width = self.x_tick_span / 4
-        for i, (l, (v1, v2)) in enumerate(self.data):
-            if self.highlight == i:
+        for i, (weekday, (v1, v2)) in enumerate(self.data):
+            if self.highlight == weekday:
                 v1_color = self.V1_HI_COLOR
                 v2_color = self.V2_HI_COLOR
             else:
