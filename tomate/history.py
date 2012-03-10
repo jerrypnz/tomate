@@ -28,7 +28,7 @@ from datetime import date
 from tomate.uimodel import FinishedTomatoModel
 from tomate.uimodel import FinishedActivityModel
 from tomate.uimodel import WeeklyStatisticsModel
-from tomate.statistics import WeeklyGraph
+from tomate.chart import WeeklyBarChart
 
 class HistoryView(gtk.VPaned):
     """Activity history view"""
@@ -39,7 +39,7 @@ class HistoryView(gtk.VPaned):
         self.tomato_view = self._create_tomato_view()
         self.tomato_model = self.tomato_view.get_model()
         self.stat_model = WeeklyStatisticsModel()
-        self.stat_graph = WeeklyGraph(self.stat_model)
+        self.stat_graph = WeeklyBarChart(self.stat_model)
 
         tomato_wnd = gtk.ScrolledWindow()
         tomato_wnd.add(self.tomato_view)

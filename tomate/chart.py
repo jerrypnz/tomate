@@ -31,12 +31,12 @@ from datetime import datetime, date, timedelta, time
 from tomate.uimodel import WeeklyStatisticsModel
 
 
-class WeeklyGraph(gtk.DrawingArea):
+class WeeklyBarChart(gtk.DrawingArea):
 
     __gsignals__ = { "expose-event": "override" }
 
     def __init__(self, model):
-        super(WeeklyGraph, self).__init__()
+        super(WeeklyBarChart, self).__init__()
         self.model = model
         self.model.connect('data-updated', self._on_data_reloaded)
         self.set_size_request(500, 400)
