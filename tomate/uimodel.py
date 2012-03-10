@@ -193,9 +193,7 @@ class WeeklyStatisticsModel(gobject.GObject):
         table = self._empty_table(start_day, end_day)
         time1 = datetime.combine(start_day, time(0, 0, 0))
         time2 = datetime.combine(end_day, time(23, 59, 59))
-        print "Start time:", time1, "End time:", time2
         tomato_stats = self.store.list_tomato_states(time1, time2)
-        print "Tomato status:", tomato_stats
         for stat, start_time, end_time in tomato_stats:
             day = date.fromtimestamp(start_time)
             if stat == model.FINISHED:

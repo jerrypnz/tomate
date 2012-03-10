@@ -19,8 +19,11 @@
 # You should have received a copy of the GNU General Public
 # License along with Foobar. If not, see http://www.gnu.org/licenses/.
 
+__ver_major__ = 0
+__ver_minor__ = 1
+__ver_patch__ = 1
 
-__version__ = '0.1.1'
+__version__ = '.'.join(map(str, (__ver_major__, __ver_minor__, __ver_patch__)))
 
 I18N_PKG_NAME = 'tomate'
 

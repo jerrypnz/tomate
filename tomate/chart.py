@@ -114,7 +114,7 @@ class BarGraphRenderer(object):
         self.graph_width = self.width - 2 * self.border_width
         self.graph_height = self.height - self.border_width - self.top_border_width
         self.x_max = len(self.data)
-        self.y_max = max([max(vals) for weekday, vals in self.data]) + 2
+        self.y_max = max([max(vals) for weekday, vals in self.data]) + 4
         self.x_tick_span = (self.graph_width - self.x_reserv) / self.x_max + 2
         self.x_ticks = range(self.x_reserv, self.graph_width, self.x_tick_span)
         self.y_tick_span = self.graph_height / self.y_max + 2
@@ -147,8 +147,8 @@ class BarGraphRenderer(object):
             cr.line_to(self.TICK_LEN, self.graph_height - y_tick)
             cr.move_to(self.graph_width, self.graph_height - y_tick)
             cr.line_to(self.graph_width - 3, self.graph_height - y_tick)
-            cr.move_to(-10, self.graph_height - y_tick + 5)
-            cr.show_text(str(i))
+            cr.move_to(-20, self.graph_height - y_tick + 5)
+            cr.show_text(str(i).rjust(3))
         cr.stroke()
         cr.move_to(-30, self.graph_height / 2 + 30)
         cr.save()

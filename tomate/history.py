@@ -45,20 +45,17 @@ class HistoryView(gtk.VPaned):
         tomato_wnd.add(self.tomato_view)
         tomato_wnd.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        box1 = gtk.VBox(False, 0)
-        box1.pack_start(self.calendar, True, False, padding=5)
+        tomato_view = gtk.Viewport()
+        tomato_view.add(tomato_wnd)
 
-        box2 = gtk.HBox(False, 0)
-        box2.pack_start(box1, True, False, padding=5)
+        top_hbox = gtk.HBox(False, 0)
+        top_hbox.pack_start(self.calendar, False, False, padding=5)
+        top_hbox.pack_start(tomato_view, True, True, padding=5)
 
-        box3 = gtk.VBox(False, 0)
-        box3.pack_start(tomato_wnd, True, True, padding=5)
+        top_vbox = gtk.VBox(False, 0)
+        top_vbox.pack_start(top_hbox, True, True, padding=5)
 
-        pane = gtk.HPaned()
-        pane.pack1(box2, shrink=False)
-        pane.pack2(box3, shrink=False)
-
-        self.pack1(pane, shrink=False)
+        self.pack1(top_vbox, shrink=False)
         self.pack2(self.stat_graph, shrink=False)
 
         self._on_day_changed(self.calendar)
@@ -89,12 +86,12 @@ class HistoryView(gtk.VPaned):
         return view
 
     def refresh(self):
-        self._on_day_changed(self.calendar)
+        self._on_day_changed(self.calendar, force=True)
 
-    def _on_day_changed(self, calendar):
+    def _on_day_changed(self, calendar, force=False):
         y, m, d = calendar.get_date()
         #The month is 0-based, so we need to add 1 to it
         selected_day = date(y, m + 1, d)
         tomato_count, interruption_count = self.tomato_model.load_finished_tomatoes(selected_day)
-        self.stat_model.reload_data(selected_day)
+        self.stat_model.reload_data(selected_day, force=force)
 

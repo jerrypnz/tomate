@@ -27,6 +27,7 @@ import gobject
 import logging
 import webbrowser
 
+from tomate import __version__
 from tomate import timequotes
 from tomate import util
 
@@ -54,8 +55,11 @@ class MainWindow(gtk.Window):
         self.menu_model = self.menu_view.get_model()
         self._setup_pages()
 
+        left_pane = gtk.Viewport()
+        left_pane.add(self.menu_view)
+
         mainpane = gtk.HPaned()
-        mainpane.pack1(self.menu_view, shrink=False)
+        mainpane.pack1(left_pane, shrink=False)
         mainpane.pack2(self.notebook, shrink=False)
 
         quote, author = timequotes.random_quote()
@@ -140,8 +144,9 @@ class MainWindow(gtk.Window):
         pass
 
     def _on_howpage(self, widget):
-        webbrowser.open('https://github.com/moonranger/tomate')
-        return False
+        about_dlg = TomateAboutDialog()
+        about_dlg.run()
+        about_dlg.destroy()
 
     def _on_select_change(self, widget):
         (model, it) = self.menu_view.get_selection().get_selected()
@@ -151,6 +156,23 @@ class MainWindow(gtk.Window):
             view = self.notebook.get_nth_page(pgnum)
             if hasattr(view, 'refresh'):
                 view.refresh()
+
+
+AUTHORS = (_('Jerry Peng <pr2jerry@gmail.com>'),)
+COMMENT = _('Tomate is a time management tool inspired by the pomodoro technique')
+
+class TomateAboutDialog(gtk.AboutDialog):
+    """docstring for TomateAboutDialog"""
+    def __init__(self):
+        super(TomateAboutDialog, self).__init__()
+        self.set_name(_('Tomate'))
+        self.set_program_name(_('Tomate'))
+        self.set_comments(COMMENT)
+        self.set_version(__version__)
+        self.set_copyright('\xc2\xA9Copyright 2012, Jerry Peng')
+        self.set_website('https://github.com/moonranger/tomate')
+        self.set_website_label(_('Homepage on github'))
+        self.set_authors(AUTHORS)
 
 
 QUOTE_MAX_CHARS = 80
