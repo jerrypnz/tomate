@@ -39,7 +39,7 @@ msgstr "关于Tomate"
 
 #: tomate/ui.py:161
 msgid "Jerry Peng<pr2jerry@gmail.com>"
-msgstr "彭睿<pr2jerry@gmail.com>"
+msgstr "Jerry Peng<pr2jerry@gmail.com>"
 
 #: tomate/ui.py:162
 msgid "Tomate is a time management tool inspired by the pomodoro technique"

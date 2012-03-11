@@ -32,7 +32,7 @@ setup(
     author_email='pr2jerry@gmail.com',
     url='https://github.com/moonranger/tomate',
     packages=['tomate'],
-    requires=['pygtk(>=2.4)', 'pynotify'],
+    requires=['pygtk(>=2.4)', 'pynotify', 'pycairo'],
     entry_points = {
         'gui_scripts': ['tomate=tomate.ui:start_app'],
         },

@@ -38,7 +38,7 @@ msgid "About Tomate"
 msgstr ""
 
 #: tomate/ui.py:161
-msgid "Jerry Peng <pr2jerry@gmail.com>"
+msgid "Jerry Peng<pr2jerry@gmail.com>"
 msgstr ""
 
 #: tomate/ui.py:162

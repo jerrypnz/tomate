@@ -158,7 +158,7 @@ class MainWindow(gtk.Window):
                 view.refresh()
 
 
-AUTHORS = (_('Jerry Peng <pr2jerry@gmail.com>'),)
+AUTHORS = (_('Jerry Peng<pr2jerry@gmail.com>'),)
 COMMENT = _('Tomate is a time management tool inspired by the pomodoro technique')
 
 class TomateAboutDialog(gtk.AboutDialog):
