@@ -167,24 +167,20 @@ class BarGraphRenderer(object):
             else:
                 v1_color = self.V1_COLOR
                 v2_color = self.V2_COLOR
-            v1_bar_height = max(self.y_tick_span * v1, 1)
-            v2_bar_height = max(self.y_tick_span * v2, 1)
+            v1_bar_height = max(self.y_tick_span * v1, 2)
+            v2_bar_height = max(self.y_tick_span * v2, 2)
             cr.set_source_rgb(*v1_color)
             cr.rectangle(self.x_ticks[i] - bar_width,
                     self.graph_height - v1_bar_height,
                     bar_width,
                     v1_bar_height)
-            cr.fill_preserve()
-            cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
-            cr.stroke()
+            cr.fill()
             cr.set_source_rgb(*v2_color)
             cr.rectangle(self.x_ticks[i],
                     self.graph_height - v2_bar_height,
                     bar_width,
                     v2_bar_height)
-            cr.fill_preserve()
-            cr.set_source_rgba(0.0, 0.0, 0.0, 0.5)
-            cr.stroke()
+            cr.fill()
 
     def _draw_legends(self, cr):
         cr.translate(0, 0)
