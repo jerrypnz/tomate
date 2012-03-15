@@ -2,7 +2,7 @@
 Name=Tomate
 _Comment=Tomate is a tool for pomodoro technique
 Exec=tomate
-Icon=stock_task
+Icon=tomate
 Terminal=false
 X-MultipleArgs=false
 Type=Application
