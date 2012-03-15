@@ -89,7 +89,7 @@ class MainWindow(gtk.Window):
 
         self.set_title('Tomate')
         self.set_position(gtk.WIN_POS_CENTER)
-        self.set_icon_name('stock_task')
+        self.set_icon_name('tomate')
         self.set_border_width(5)
         self.set_geometry_hints(mainbox, min_width=750, min_height=515)
 
@@ -167,6 +167,9 @@ class TomateAboutDialog(gtk.AboutDialog):
         super(TomateAboutDialog, self).__init__()
         self.set_name(_('Tomate'))
         self.set_program_name(_('Tomate'))
+        self.set_logo_icon_name('tomate')
+        self.set_skip_pager_hint(True)
+        self.set_skip_taskbar_hint(True)
         self.set_comments(COMMENT)
         self.set_version(__version__)
         self.set_copyright('\xc2\xA9Copyright 2012, Jerry Peng')
